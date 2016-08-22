@@ -1,14 +1,9 @@
-#Clayandgithub Blog
+# HuxBlog Boilerplate
 
-## About the project
-Clean Blog by Start Bootstrap - Jekyll Version
-Based on https://github.com/Huxpro/huxpro.github.io
-&& https://github.com/BlackrockDigital/startbootstrap-clean-blog-jekyll 
+##### This is the boilerplate of [Hux Blog](https://github.com/Huxpro/huxpro.github.io), all documents is over there!
 
-## License
+#### [View Boilerplate &rarr;](http://huangxuan.me/huxblog-boilerplate/)
 
-Apache License 2.0.
-Copyright (c) 2015-2016 Huxpro
+#### [View Live Hux Blog &rarr;](http://huangxuan.me)
 
-Hux Blog is derived from [Clean Blog Jekyll Theme (MIT License)](https://github.com/BlackrockDigital/startbootstrap-clean-blog-jekyll/)
-Copyright (c) 2013-2016 Blackrock Digital LLC.
+## If you like Hux Blog, Please star [huxpro.github.io repo](https://github.com/Huxpro/huxpro.github.io) instead of this! Thank you!
