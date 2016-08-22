@@ -1,7 +1,7 @@
 # Site settings
-title: WWW Blog
-SEOTitle: 王维维的博客 | WWW Blog
-header-img: img/home-bg.jpg
+title: WWW
+SEOTitle: 王维维的个人网站 | WWW Personal Website
+header-img: img/common-bg.jpg
 email: clayanddev@163.com
 description: "关于人工智能，自然语言处理，Java WEB开发，后台架构 | 这里是 @WWW王维维 的个人博客。"
 keyword: "王维维, clayoverwind, 王维维的博客, clayoverwind Blog, 博客, 个人网站, 互联网, 后端, 架构, Java，Linux, 深度学习"
