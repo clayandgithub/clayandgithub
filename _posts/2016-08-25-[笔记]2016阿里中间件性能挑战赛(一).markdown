@@ -114,14 +114,10 @@ sudo make install
 
 操作系统环境:ubuntu14.04
 
-> 新建用户admin和用户组admin
-
-> 安装rpm包
-
-> [集群配置](http://blog.csdn.net/leishenop/article/details/51385567)
-
-> [单机配置](https://github.com/alibaba/jstorm/wiki/%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85), 在同一台机器上启动nimbus和supervisor）
-
+1. 新建用户admin和用户组admin
+2. 安装rpm包
+3. [集群配置](http://blog.csdn.net/leishenop/article/details/51385567)
+4. [单机配置](https://github.com/alibaba/jstorm/wiki/%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85), 在同一台机器上启动nimbus和supervisor）
 **5. 全部完成后使用jps命令应该能够看到如下进程**
 
 ```bash
