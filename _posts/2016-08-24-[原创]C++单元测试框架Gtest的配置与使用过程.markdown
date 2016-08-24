@@ -223,6 +223,4 @@ make .
 
 ## 后记<span id="后记" />
 
-有了基本的页面，接下来可以找一个漂亮的jekyll模板，向里面填充内容就可以了。
-
-更多关于GitHub Pages的细节请参考[GitHub Help](https://help.github.com/categories/github-pages-basics/)
+这只是Gtest的最基本的用法，更多的内容请参考[Gtest的官网文档](http://code.google.com/p/googletest/)

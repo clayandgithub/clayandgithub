@@ -1,0 +1,133 @@
+---
+layout:     post
+title:      "[笔记]2016阿里中间件性能挑战赛(一)"
+subtitle:   "初赛环境配置(Tair、Jstorm、RocketMQ)"
+date:       2010-01-21
+author:     "王维维"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - Tair分布式存储
+    - Jstorm实时流式计算框架
+    - RocketMQ消息中间件
+---
+
+> “Try something different！”
+
+## 前言<span id="前言" />
+
+[跳过废话，直接看正文](#正文)
+
+2016.5-2016.8，阿里巴巴集团在天池大数据平台上举行了阿里中间件性能挑战赛，我和北京的两个队友参加了比赛。经历了初赛和复赛，最终获得了决赛的亚军。在这个过程中我收获颇丰，在此便记录下整个比赛的一些过程，并分享出初赛和复赛的代码。
+
+---
+
+## 正文<span id = "正文" />
+
+### 目录<span id="目录" />
+
+* [初赛题目介绍](#初赛题目介绍)
+* [Tair环境配置](#Tair环境配置)
+* [RocketMQ环境配置](#RocketMQ环境配置)
+* [Jstorm环境配置](#Jstorm环境配置)
+
+### 初赛题目介绍<span id="初赛题目介绍" />
+
+[赛题官方介绍](https://tianchi.shuju.aliyun.com/competition/information.htm?raceId=231533)
+其实任务就是写一个topology，整个任务流程就是利用JStorm从RocketMQ拉取数据，按照要求实时计算出结果，并将结果写入Tair。
+
+赛题所使用的三种产品是：
+
+* RocketMQ-3.2.6
+* Tair-2.3.4
+* JStorm-2.1.1
+
+帮助文档：
+
+* [Tair开发帮助文档](http://code.taobao.org/p/tair/wiki/index/)
+* [RocketMQ 开发帮助文档](https://github.com/alibaba/RocketMQ)
+* [Jstorm开发帮助文档](https://github.com/alibaba/jstorm/wiki/JStorm-Chinese-Documentation)
+
+### Tair环境配置<span id="Tair环境配置" />
+
+按照[Tair部署帮助文档](http://code.taobao.org/p/tair/wiki/deploy/)配置即可
+
+> 值得注意的是，在ubuntu上部署会遇到一些问题，解决起来有些麻烦，因此最好在centos上部署。
+
+### RocketMQ环境配置<span id="RocketMQ环境配置" />
+
+> 单机部署过程记录:
+> 1. 下载[release包](https://github.com/alibaba/RocketMQ/releases/download/v3.2.6/alibaba-rocketmq-3.2.6.tar.gz)
+> 2.下载[源码](https://github.com/alibaba/RocketMQ)
+> 3. `cd /alibaba-rocketmq/bin` (第１步中解压出的文件夹)
+> 4. 启动namesrv
+     `nohup sh mqnamesrv &`
+    (默认NameServer的监听端口是9876，可以用 `jps`和 `netstat -pan | grep 9876`　查看是否启动成功)
+> 5. 部署Broker(单Master模式)
+`nohup sh mqbroker -n "127.0.0.1:9876" -c ../conf/2m-2s-async/broker-a.properties &`
+> 6. 打开第2步中下载的文件夹RocketMQ,用IDE(Eclipse/IDEA)导入rocketmq-example项目
+> 7. 在**com.alibaba.rocketmq.example.quickstart.Producer**中的`DefaultMQProducer producer = new DefaultMQProducer...`这一行后加入`producer.setNamesrvAddr("127.0.0.1:9876");`
+> 8. 在**com.alibaba.rocketmq.example.quickstart.Consumer**中的`DefaultMQPushConsumer consumer = new DefaultMQPushConsumer...`这一行后加入`consumer.setNamesrvAddr("127.0.0.1:9876");`
+> 9. 先运行**com.alibaba.rocketmq.example.quickstart.Consumer**再运行**com.alibaba.rocketmq.example.quickstart.Producer**就可以看到输出信息
+
+其他参考资料：
+[阿里RocketMQ Quick Start](http://blog.csdn.net/a19881029/article/details/34446629)
+
+### Jstorm环境配置<span id="Jstorm环境配置" />
+
+与storm一样，Jstorm的底层消息通信机制依赖zeromq/jzmq，另外，Jstorm通过zookeeper实现数据共享和协调服务，因此需要先安装这三个组件。
+
+**1. 安装zeromq**
+
+```bash
+wget http://download.zeromq.org/zeromq-3.2.4.tar.gz
+tar zxf zeromq-3.2.4.tar.gz
+cd zeromq-3.2.4
+./configure
+make
+sudo make install
+sudo ldconfig
+```
+
+**2. 安装jzmq**
+
+```bash
+wget https://github.com/zeromq/jzmq/tarball/master -O jzmq.tar.gz
+tar zxf jzmq.tar.gz
+cd jzmq/jzmq-jni
+./autogen.sh
+./configure
+make
+sudo make install
+```
+
+**3. 安装zookeeper**
+
+下载地址:[zookeeper-3.4.8.tar.gz](http://apache.claz.org/zookeeper/stable/zookeeper-3.4.8.tar.gz)
+
+单机或集群的配置过程参考[ZooKeeper的安装](http://blog.csdn.net/hi_kevin/article/details/7089358)即可
+
+**4. 安装jstorm**
+
+下载地址:[taobao-jstorm-2.1.1.rpm](https://github.com/alibaba/jstorm/wiki/Downloads中的taobao-jstorm-2.1.1.rpm)
+
+操作系统环境:ubuntu14.04
+
+> 新建用户admin和用户组admin
+> 安装rpm包
+> [集群配置](http://blog.csdn.net/leishenop/article/details/51385567)
+> [单机配置](https://github.com/alibaba/jstorm/wiki/%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85), 在同一台机器上启动nimbus和supervisor）
+
+**5. 全部完成后使用jps命令应该能够看到如下进程**
+
+```bash
+admin@ubuntu:~$ jps
+9840 NimbusServer
+8051 Bootstrap
+9573 QuorumPeerMain
+10086 Supervisor
+8924 Jps
+```
+
+## 后记<span id="后记" />
+
+之前完全没有接触过这三个框架，前前后后共花了两天时间才完成配置，在这个过程中遇到许多坑，因此浪费了不少时间。希望这个笔记能够帮助大家绕过这些坑。
