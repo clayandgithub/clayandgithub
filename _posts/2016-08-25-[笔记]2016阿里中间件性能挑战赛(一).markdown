@@ -56,28 +56,20 @@ tags:
 
 ### RocketMQ环境配置<span id="RocketMQ环境配置" />
 
-> 单机部署过程记录:
+单机部署过程记录:
 
-> 1. 下载[release包](https://github.com/alibaba/RocketMQ/releases/download/v3.2.6/alibaba-rocketmq-3.2.6.tar.gz)
-
-> 2.下载[源码](https://github.com/alibaba/RocketMQ)
-
-> 3. `cd /alibaba-rocketmq/bin` (第１步中解压出的文件夹)
-
-> 4. 启动namesrv
+1. 下载[release包](https://github.com/alibaba/RocketMQ/releases/download/v3.2.6/alibaba-rocketmq-3.2.6.tar.gz)
+2.下载[源码](https://github.com/alibaba/RocketMQ)
+3. `cd /alibaba-rocketmq/bin` (第１步中解压出的文件夹)
+4. 启动namesrv
      `nohup sh mqnamesrv &`
     (默认NameServer的监听端口是9876，可以用 `jps`和 `netstat -pan | grep 9876`　查看是否启动成功)
-
-> 5. 部署Broker(单Master模式)
+5. 部署Broker(单Master模式)
 `nohup sh mqbroker -n "127.0.0.1:9876" -c ../conf/2m-2s-async/broker-a.properties &`
-
-> 6. 打开第2步中下载的文件夹RocketMQ,用IDE(Eclipse/IDEA)导入rocketmq-example项目
-
-> 7. 在**com.alibaba.rocketmq.example.quickstart.Producer**中的`DefaultMQProducer producer = new DefaultMQProducer...`这一行后加入`producer.setNamesrvAddr("127.0.0.1:9876");`
-
-> 8. 在**com.alibaba.rocketmq.example.quickstart.Consumer**中的`DefaultMQPushConsumer consumer = new DefaultMQPushConsumer...`这一行后加入`consumer.setNamesrvAddr("127.0.0.1:9876");`
-
-> 9. 先运行**com.alibaba.rocketmq.example.quickstart.Consumer**再运行**com.alibaba.rocketmq.example.quickstart.Producer**就可以看到输出信息
+6. 打开第2步中下载的文件夹RocketMQ,用IDE(Eclipse/IDEA)导入rocketmq-example项目
+7. 在**com.alibaba.rocketmq.example.quickstart.Producer**中的`DefaultMQProducer producer = new DefaultMQProducer...`这一行后加入`producer.setNamesrvAddr("127.0.0.1:9876");`
+8. 在**com.alibaba.rocketmq.example.quickstart.Consumer**中的`DefaultMQPushConsumer consumer = new DefaultMQPushConsumer...`这一行后加入`consumer.setNamesrvAddr("127.0.0.1:9876");`
+9. 先运行**com.alibaba.rocketmq.example.quickstart.Consumer**再运行**com.alibaba.rocketmq.example.quickstart.Producer**就可以看到输出信息
 
 其他参考资料：
 [阿里RocketMQ Quick Start](http://blog.csdn.net/a19881029/article/details/34446629)
