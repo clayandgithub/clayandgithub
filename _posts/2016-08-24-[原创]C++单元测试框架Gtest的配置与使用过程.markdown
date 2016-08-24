@@ -13,8 +13,7 @@ tags:
 
 > “你的时间非常值钱，我是单元测试，我在编程世界等你。 ”
 
-<span id="前言"></span>
-## 前言
+## 前言<span id="前言" />
 
 [跳过废话，直接看正文](#正文)
 
@@ -23,11 +22,11 @@ tags:
 Java有大名鼎鼎的JUnit，而C++想必也有成熟的单元测试框架。经过一番搜索，最后我选择了Google的C++开源单元测试框架Gtest。下面记录一下Gtest的配置和简单使用，希望能够帮助到有需要的朋友。
 
 ---
-<span id="正文"></span>
-## 正文
 
-<span id="目录"></span>
-### 目录
+## 正文<span id = "正文" />
+
+### 目录<span id="目录" />
+
 * [准备](#准备)
 * [配置](#配置)
 * [使用](#使用)
@@ -35,19 +34,19 @@ Java有大名鼎鼎的JUnit，而C++想必也有成熟的单元测试框架。�
  * [代码构成](#代码构成)
  * [运行](#运行)
 
-<span id="准备"></span>
-### 准备
+### 准备<span id="准备" />
+
  - 环境：Ubuntu 14.04
  - [GTest 官方下载地址](http://code.google.com/p/googletest/downloads/list)
  - 本文选择的版本是[1.7.0](http://googletest.googlecode.com/files/gtest-1.7.0.zip)
  - [备用下载地址](http://yun.baidu.com/s/1dDGxpiL)
 
-<span id="配置"></span>
-### 配置
+### 配置<span id="配置" />
 
 (1) 解压到自定义目录，为了方便，将gtest-1.7.0/CMakeList.txt中的`option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)`中的**OFF**改为**ON**以生成动态链接库。
 
 (2)使用cmake编译，再进行库文件和include文件相关配置，具体命令如下：
+
 ```bash
 unzip gtest-1.7.0.zip  
 cd gtest-1.7.0  
@@ -57,6 +56,7 @@ cmake ..
 ```
 
 (3)在编译完成后，进行头文件和动态链接文件的配置，具体命令如下：
+
 ```bash
 sudo mkdir /usr/lib/gtest
 sudo cp *.so /usr/lib/gtest/
@@ -66,12 +66,12 @@ sudo chmod 755 /usr/include/gtest -R
 ```
 到此，Gtest就算配置完成，可以在C++程序中以动态链接库的方式使用。
 
-<span id="使用"></span>
-### 使用
+### 使用<span id="使用" />
+
 GTest的使用起来非常简便，下面我将用一个简单的项目来展示GTest的基本的使用方法。
 
-<span id="项目文件构成"></span>
-#### 项目文件构成：
+#### 项目文件构成：<span id="项目文件构成" />
+
  * TestCpp
   * CMakeLists.txt
   * main.cpp
@@ -83,9 +83,10 @@ GTest的使用起来非常简便，下面我将用一个简单的项目来展示
      * TestUtil.cpp
      * TestUtil.h
 
-<span id="代码构成"></span>
-#### 代码构成
+#### 代码构成<span id="代码构成" />
+
 *main.cpp*
+
 ```cpp
 #include "TestUtil.h"  
   
@@ -97,6 +98,7 @@ int main(int argc, char** argv)
 ```
 
 *StringUtilTest.cpp*
+
 ```cpp
 #include "StringUtil.h"  
 #include <gtest/gtest.h>  
@@ -111,7 +113,9 @@ TEST(StringUtilTest, getTestString)
     delete str;  
 }  
 ```
+
 *StringUtil.cpp*
+
 ```cpp
 #include "StringUtil.h"  
   
@@ -127,6 +131,7 @@ std::string StringUtil::getTestString()
 ```
 
 *StringUtil.h*
+
 ```cpp
 #ifndef STRINGUTIL_H  
 #define STRINGUTIL_H  
@@ -144,6 +149,7 @@ public:
 ```
 
 *TestUtil.cpp*
+
 ```cpp
 #include "TestUtil.h"  
 # include <gtest/gtest.h>  
@@ -156,6 +162,7 @@ int TestUtil::runTests(int argc, char **argv)
 ```
 
 *TestUtil.h*
+
 ```cpp
 #ifndef TESTUTIL_H  
 #define TESTUTIL_H  
@@ -174,6 +181,7 @@ private:
 ```
 
 *CMakeLists.txt*
+
 ```cmake
 #basic setting  
 PROJECT(TestCpp)  
@@ -200,9 +208,10 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${SRC_LIST})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} libgtest.so)  
 ```
 
-<span id="运行"></span>
-#### 运行
+#### 运行<span id="运行" />
+
 使用cmake编译运行即可看到对StringUtil的测试结果，命令如下：
+
 ```bash
 cd TestCpp  
 mkdir build  
@@ -212,7 +221,8 @@ make .
 ./TestCpp  
 ```
 
-<span id="后记"></span>
-## 后记
+## 后记<span id="后记" />
 
-这只是Gtest的最基本的用法，更多的内容请参考[Gtest的官网文档](http://code.google.com/p/googletest/)
+有了基本的页面，接下来可以找一个漂亮的jekyll模板，向里面填充内容就可以了。
+
+更多关于GitHub Pages的细节请参考[GitHub Help](https://help.github.com/categories/github-pages-basics/)

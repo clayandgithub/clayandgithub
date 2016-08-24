@@ -1,9 +1,9 @@
 ---
 layout:     post
-title:      "Markdown 模板"
-subtitle:   "模板"
+title:      "[模板]Markdown模板"
+subtitle:   "Markdown模板"
 date:       2010-01-21
-author:     "WWW"
+author:     "王维维"
 header-img: "img/post-bg-2015.jpg"
 tags:
     - Markdown
@@ -11,7 +11,7 @@ tags:
 
 > “任何起点都可以创造辉煌！”
 
-## 前言
+## 前言<span id="前言" />
 
 [跳过废话，直接看正文](#正文)
 
@@ -52,7 +52,7 @@ git push origin master
 
 当push到远程master分支后，就可以在`https://USER_NAME.github.io/REPOSITORY_NAME`看到具体页面了。接下来像普通的github项目一样开发和提交即可。
 
-## 后记
+## 后记<span id="后记" />
 
 有了基本的页面，接下来可以找一个漂亮的jekyll模板，向里面填充内容就可以了。
 
