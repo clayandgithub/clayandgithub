@@ -13,7 +13,7 @@ tags:
 
 ## 0. Foreword
 
-[跳过废话，直接看正文](#正文)
+[跳过废话，直接看正文](#section)
 
 我一直想拥有一个个人主页，但因为懒、缺少服务器、域名等诸多原因，始终没有去写。后来发现在github上可以搭建免费的个人静态站点，于是按照[官方教程](https://help.github.com/articles/creating-project-pages-from-the-command-line/)初步搭建起了个简单的页面，这里简单地记录下关键步骤：
 
@@ -33,11 +33,10 @@ tags:
 
 > 这一步就可以直接用github提供的模板工具自动生成个人页面（仓库>>Setttings>>GitHub Pages>> Launch automatic page generator）。
 
-当然，如果嫌模板太简单，要自己开发，则需要同步到仓库，操作步骤如下：
-
 ### 1.4 同步到本地仓库
 
 > 在本地执行以下脚本
+
 ```bash
 git clone https://github.com/USER_NAME/REPOSITORY_NAME.git LOCAL_DIRECTORY
 cd LOCAL_DIRECTORY
