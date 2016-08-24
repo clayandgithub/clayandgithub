@@ -2,7 +2,7 @@
 layout:     post
 title:      "[笔记]2016阿里中间件性能挑战赛(一)"
 subtitle:   "初赛环境配置(Tair、Jstorm、RocketMQ)"
-date:       2010-01-21
+date:       2016-08-25
 author:     "王维维"
 header-img: "img/post-bg-2015.jpg"
 tags:
@@ -33,7 +33,8 @@ tags:
 ### 初赛题目介绍<span id="初赛题目介绍" />
 
 [赛题官方介绍](https://tianchi.shuju.aliyun.com/competition/information.htm?raceId=231533)
-其实任务就是写一个topology，整个任务流程就是利用JStorm从RocketMQ拉取数据，按照要求实时计算出结果，并将结果写入Tair。
+
+其实就是写一个topology，整个任务流程是利用JStorm从RocketMQ拉取数据，按照要求实时计算出结果，并将结果写入Tair。
 
 赛题所使用的三种产品是：
 
@@ -56,17 +57,26 @@ tags:
 ### RocketMQ环境配置<span id="RocketMQ环境配置" />
 
 > 单机部署过程记录:
+
 > 1. 下载[release包](https://github.com/alibaba/RocketMQ/releases/download/v3.2.6/alibaba-rocketmq-3.2.6.tar.gz)
+
 > 2.下载[源码](https://github.com/alibaba/RocketMQ)
+
 > 3. `cd /alibaba-rocketmq/bin` (第１步中解压出的文件夹)
+
 > 4. 启动namesrv
      `nohup sh mqnamesrv &`
     (默认NameServer的监听端口是9876，可以用 `jps`和 `netstat -pan | grep 9876`　查看是否启动成功)
+
 > 5. 部署Broker(单Master模式)
 `nohup sh mqbroker -n "127.0.0.1:9876" -c ../conf/2m-2s-async/broker-a.properties &`
+
 > 6. 打开第2步中下载的文件夹RocketMQ,用IDE(Eclipse/IDEA)导入rocketmq-example项目
+
 > 7. 在**com.alibaba.rocketmq.example.quickstart.Producer**中的`DefaultMQProducer producer = new DefaultMQProducer...`这一行后加入`producer.setNamesrvAddr("127.0.0.1:9876");`
+
 > 8. 在**com.alibaba.rocketmq.example.quickstart.Consumer**中的`DefaultMQPushConsumer consumer = new DefaultMQPushConsumer...`这一行后加入`consumer.setNamesrvAddr("127.0.0.1:9876");`
+
 > 9. 先运行**com.alibaba.rocketmq.example.quickstart.Consumer**再运行**com.alibaba.rocketmq.example.quickstart.Producer**就可以看到输出信息
 
 其他参考资料：
@@ -113,8 +123,11 @@ sudo make install
 操作系统环境:ubuntu14.04
 
 > 新建用户admin和用户组admin
+
 > 安装rpm包
+
 > [集群配置](http://blog.csdn.net/leishenop/article/details/51385567)
+
 > [单机配置](https://github.com/alibaba/jstorm/wiki/%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85), 在同一台机器上启动nimbus和supervisor）
 
 **5. 全部完成后使用jps命令应该能够看到如下进程**
