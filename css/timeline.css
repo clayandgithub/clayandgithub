@@ -189,36 +189,6 @@ html{
 body{
 	background: #fafafa;
 }
-header{
-	background: #6ca8fb;
-	text-align: center;
-	height: 620px;
-	min-width: 100%;
-	padding: 5em 0px !important;
-	position: relative;
-	border-bottom: 1px solid #edeeee;
-}
-header h1 {
-    font-size: 70px;
-    color: white;
-    font-weight: 100;
-    margin-top: 26px;
-    margin-bottom: 10px;
-    line-height: 1;
-    letter-spacing: 0.1em;
-}
-header p{
-	text-align: center;
-	color: white;
-	font-size: 16px;
-	line-height: 1.6em;
-	letter-spacing: 1px;
-	font-weight: 300;
-	margin: 1.7em;
-}
-header img{
-	width: 190px;
-}
 
 .cbp_tmlabel .hux_ul{
 	border:none;
