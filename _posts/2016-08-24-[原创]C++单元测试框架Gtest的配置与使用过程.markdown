@@ -1,0 +1,218 @@
+---
+layout:     post
+title:      "[原创]C++单元测试框架Gtest的配置与使用过程"
+subtitle:   "Gtest笔记"
+date:       2016-08-24
+author:     "王维维"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - 单元测试
+    - Gtest
+    - cmake
+---
+
+> “你的时间非常值钱，我是单元测试，我在编程世界等你。 ”
+
+<span id="前言"></span>
+## 前言
+
+[跳过废话，直接看正文](#正文)
+
+此前我很少写单元测试，总认为那是在浪费时间。但后来发现，节省的那点写测试代码的时间远远抵不上花在后期调试上的时间。最近在看《Angile Java》，这才逐渐了解到单元测试在软件开发过程中的重要性，因此决定从现在开始要养成写单元测试的习惯。
+
+Java有大名鼎鼎的JUnit，而C++想必也有成熟的单元测试框架。经过一番搜索，最后我选择了Google的C++开源单元测试框架Gtest。下面记录一下Gtest的配置和简单使用，希望能够帮助到有需要的朋友。
+
+---
+<span id="正文"></span>
+## 正文
+
+<span id="目录"></span>
+### 目录
+* [准备](#准备)
+* [配置](#配置)
+* [使用](#使用)
+ * [项目文件构成](#项目文件构成)
+ * [代码构成](#代码构成)
+ * [运行](#运行)
+
+<span id="准备"></span>
+### 准备
+ - 环境：Ubuntu 14.04
+ - [GTest 官方下载地址](http://code.google.com/p/googletest/downloads/list)
+ - 本文选择的版本是[1.7.0](http://googletest.googlecode.com/files/gtest-1.7.0.zip)
+ - [备用下载地址](http://yun.baidu.com/s/1dDGxpiL)
+
+<span id="配置"></span>
+### 配置
+
+(1) 解压到自定义目录，为了方便，将gtest-1.7.0/CMakeList.txt中的`option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)`中的**OFF**改为**ON**以生成动态链接库。
+
+(2)使用cmake编译，再进行库文件和include文件相关配置，具体命令如下：
+```bash
+unzip gtest-1.7.0.zip  
+cd gtest-1.7.0  
+mkdir build  
+cd build  
+cmake ..
+```
+
+(3)在编译完成后，进行头文件和动态链接文件的配置，具体命令如下：
+```bash
+sudo mkdir /usr/lib/gtest
+sudo cp *.so /usr/lib/gtest/
+sudo cp ../include/gtest /usr/include/gtest -R
+sudo chmod 755 /usr/lib/gtest/*.so
+sudo chmod 755 /usr/include/gtest -R
+```
+到此，Gtest就算配置完成，可以在C++程序中以动态链接库的方式使用。
+
+<span id="使用"></span>
+### 使用
+GTest的使用起来非常简便，下面我将用一个简单的项目来展示GTest的基本的使用方法。
+
+<span id="项目文件构成"></span>
+#### 项目文件构成：
+ * TestCpp
+  * CMakeLists.txt
+  * main.cpp
+  * test
+     * StringUtilTest.cpp
+  * utils
+     * StringUtil.cpp
+     * StringUtil.h
+     * TestUtil.cpp
+     * TestUtil.h
+
+<span id="代码构成"></span>
+#### 代码构成
+*main.cpp*
+```cpp
+#include "TestUtil.h"  
+  
+int main(int argc, char** argv)  
+{  
+   TestUtil::runTests(argc, argv);  
+   return 0;  
+}
+```
+
+*StringUtilTest.cpp*
+```cpp
+#include "StringUtil.h"  
+#include <gtest/gtest.h>  
+#include <string>  
+  
+using namespace std;  
+  
+TEST(StringUtilTest, getTestString)  
+{  
+    StringUtil* str = new StringUtil();  
+    EXPECT_EQ("Hello,world!", str->getTestString());  
+    delete str;  
+}  
+```
+*StringUtil.cpp*
+```cpp
+#include "StringUtil.h"  
+  
+using namespace std;  
+StringUtil::StringUtil()  
+{  
+}  
+  
+std::string StringUtil::getTestString()  
+{  
+    return string("Hello,world!");  
+}  
+```
+
+*StringUtil.h*
+```cpp
+#ifndef STRINGUTIL_H  
+#define STRINGUTIL_H  
+#include <string>  
+  
+class StringUtil  
+{  
+public:  
+    StringUtil();  
+  
+    std::string getTestString();  
+};  
+  
+#endif // STRINGUTIL_H
+```
+
+*TestUtil.cpp*
+```cpp
+#include "TestUtil.h"  
+# include <gtest/gtest.h>  
+  
+int TestUtil::runTests(int argc, char **argv)  
+{  
+    testing::InitGoogleTest(&argc, argv);  
+    return RUN_ALL_TESTS();  
+}  
+```
+
+*TestUtil.h*
+```cpp
+#ifndef TESTUTIL_H  
+#define TESTUTIL_H  
+#include <string>  
+  
+class TestUtil  
+{  
+public:  
+    static int runTests(int argc, char **argv);  
+  
+private:  
+    TestUtil(){}  
+};  
+  
+#endif // TESTUTIL_H
+```
+
+*CMakeLists.txt*
+```cmake
+#basic setting  
+PROJECT(TestCpp)  
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)  
+#SET(CMAKE_BUILD_TYPE Debug)  
+  
+#header files  
+SET(HEADER_FILES_PATH  
+./utils  
+./test  
+)  
+INCLUDE_DIRECTORIES(${HEADER_FILES_PATH})  
+  
+#src files  
+AUX_SOURCE_DIRECTORY(. SRC_LIST)  
+AUX_SOURCE_DIRECTORY(./utils SRC_LIST_1)  
+LIST(APPEND SRC_LIST ${SRC_LIST_1})  
+AUX_SOURCE_DIRECTORY(./test SRC_LIST_2)  
+LIST(APPEND SRC_LIST ${SRC_LIST_2})  
+  
+#build setting  
+LINK_DIRECTORIES(/usr/lib/gtest)  
+ADD_EXECUTABLE(${PROJECT_NAME} ${SRC_LIST})  
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} libgtest.so)  
+```
+
+<span id="运行"></span>
+#### 运行
+使用cmake编译运行即可看到对StringUtil的测试结果，命令如下：
+```bash
+cd TestCpp  
+mkdir build  
+cd build  
+cmake ..  
+make .  
+./TestCpp  
+```
+
+<span id="后记"></span>
+## 后记
+
+这只是Gtest的最基本的用法，更多的内容请参考[Gtest的官网文档](http://code.google.com/p/googletest/)
