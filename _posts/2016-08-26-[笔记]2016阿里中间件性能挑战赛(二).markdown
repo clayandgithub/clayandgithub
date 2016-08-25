@@ -163,4 +163,4 @@ public class RaceTopology {
 
 从学习新技术的角度出发，我认为在初赛学到的东西比复赛还要多一些。年轻人嘛，不能总是用自己熟悉的东西，还是要多多去学习和拥抱新技术的，不然就真的是名副其实的码农了。
 
-  [1]: img/ali_middleware_topology.png
+  [1]: /img/ali_middleware_topology.png
