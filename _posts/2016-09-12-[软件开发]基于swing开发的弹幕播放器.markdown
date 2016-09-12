@@ -131,6 +131,6 @@ private static HttpEntity decompressingEntityIfNecessary(HttpEntity entity)
 
 弹幕这种东西在将来或许能够规范化，成为一种与字幕类似的视频资源。这样每个视频都有对应的弹幕资源库，各种播放器也就能够从不同的弹幕资源库中加载并播放了。
 
-  [1]: img/danmu_player_code.png
-  [2]: img/danmu_player_controller.png
-  [3]: img/danmu_player_main_window.png
+  [1]: /img/danmu_player_code.png
+  [2]: /img/danmu_player_controller.png
+  [3]: /img/danmu_player_main_window.png
