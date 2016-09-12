@@ -1,0 +1,136 @@
+---
+layout:     post
+title:      "[软件开发]基于swing开发的弹幕播放器"
+subtitle:   "开发记录"
+date:       2016-09-12
+author:     "王维维"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - 软件开发
+    - java
+    - swing
+    - MVP架构模式
+---
+
+> “讲个笑话，程序员做UI。”
+
+## 前言<span id="前言" />
+
+[跳过废话，直接看正文](#正文)
+
+近些年来，弹幕这种实时视频评论越来越火爆，国内几乎所有的视频网站在播放器中开始加入了弹幕的功能。弹幕已经成了很多人观看视频时不可缺少的一部分，我也是其中之一。
+
+只是有时候因为网络问题、在线视频资源缺失等原因，人们通常会在本地观看离线视频，这时候要想看弹幕就有些麻烦了。经过搜索，我发现确实有一些软件能够实现在观看离线视频与弹幕的功能，比较出名的有BiliLocal以及DanDanPlayer这两个，在本质上，他们都是本地视频播放器，并通过在线搜索从各个弹幕网站下载弹幕资源并嵌入视频进行播放，都做的相当不错，只是在操作上有些麻烦，且都限制用户必须使用该播放器。
+
+因此，我就用swing写了这个小工具，它不是视频播放器，而是专门用来播放弹幕文件的弹幕播放器，能够与视频播放器一起配合为用户提供离线观看视频以及弹幕的功能。
+
+当然，这多少还是有重造车轮之嫌，毕竟嵌入弹幕的视频播放器也能够达到相同的效果，且集成的很好。只是对于程序员来说，用自己写的工具会更爽一些吧。这个东西写起来也就一两天的时间，就当做对swing编程的学习过程了。
+
+---
+
+## 正文<span id = "正文" />
+
+### 目录<span id="目录" />
+
+* [开发环境](#开发环境)
+* [软件架构](#软件架构)
+* [项目展示](#项目展示)
+* [一些问题](#一些问题)
+
+### 开发环境<span id="开发环境" />
+
+* 操作系统：windows7
+* 语言：Java
+* 界面工具包：Swing
+* 开发工具：IntellIj IDEA 2016.2.4
+* 版本管理：git
+* 运行环境：windows7、8、10
+
+### 软件架构<span id="软件架构" />
+
+软件需要支持下面几种功能：
+
+（1）根据url下载弹幕网站的弹幕文件
+（2）加载离线弹幕文件并播放
+（3）弹幕窗口置顶且背景透明
+（4）基本的播放器控制功能(时间轴、暂停、播放)
+
+我个人因为实习经历以及实验室项目的原因，参与开发了几个网站项目，因此对MVC设计模式比较熟悉，但是后来简单接触了下MVP模式，虽然是基于MVC的简单修改，但是个人觉得就代码解耦而言，MVP比MVC做得更好，因此就采用了MVP架构模式。当然，因为这是个小项目，为了节省时间，没有严格地按照MVP的架构来设计，（略去了Presenter 与View之间的接口层、减少了Presenter的数量等），但影响不大。
+
+在此列出整个项目的文件结构图：
+![项目的文件结构图][1]
+
+### 项目展示<span id="项目展示" />
+
+![弹幕控制器][2]
+
+![弹幕主窗口][3]
+
+对此项目的源码感兴趣的朋友可以直接看我的[git仓库](https://github.com/clayandgithub/DanMuPlayer)
+
+### 一些问题<span id="一些问题" />
+
+我对swing还不太熟悉，因此在开发过程中遇到了一些问题，有些已经解决，有些还没有解决，现在列出一些比较关键的供大家参考：
+
+* 弹幕主窗口要实现背景透明但文字不透明的效果
+
+这个在windows下可以通过以下代码实现：
+
+```java
+public class TransparentWindow extends JFrame {
+
+public TransparentWindow(int width, int height) {
+        this.setSize(width, height);
+        this.setUndecorated(true);
+        AWTUtilities.setWindowOpaque(this, false);
+    }
+}
+```
+
+但这个方法在windows中可以正常工作，在linux中可能就不行了，具体是怎样的效果要看linux使用的图形环境(GNOME下背景是透明的，但是文字飘过后会留下痕迹，重绘也不行，我目前不知道如何解决）
+
+* 爬取弹幕网站的弹幕文件
+
+因为没有同一的标准，每个网站的弹幕文件格式也不一样，需要自己定义一个格式，然后将不同来源的弹幕文件转换到这个格式即可
+
+此外，在第一次写爬方法时，我发现下载下来的xml文件是乱码，后来才知道原来是经过deflate算法压缩的，需要进行解压缩，关键代码如下所示(使用apache的httpclient库获取HttpEntity):
+
+```java
+private static HttpEntity decompressingEntityIfNecessary(HttpEntity entity)
+{
+	HttpEntity retEntity = entity;
+	if (entity != null && entity.getContentEncoding() != null) {
+        if ("gzip".equalsIgnoreCase(entity.getContentEncoding().getValue())) {
+        	retEntity = new GzipDecompressingEntity(entity);
+        } else if ("deflate".equalsIgnoreCase(entity.getContentEncoding().getValue())) {
+        	retEntity = new DeflateDecompressingEntity(entity);
+        }
+    }
+	return retEntity;
+}
+```
+
+* 时间轴控制
+
+这个我还是第一次写，使用Timer来实现，花了不少时间，最终效果还凑活。具体可以参考项目中的TimePanel.java文件
+
+* 未解决的奔溃问题
+
+程序在windows10上正常运行，但在windows7下运行1分钟左右后会报APPCRASH
+
+```
+故障模块名称:	ltc_game64-116096.dll
+故障模块版本:	1.0.0.1
+故障模块时间戳:	57cf505f
+异常代码:	c000041d
+```
+
+具体原因不明，有了解的朋友希望能够指点一下，感激不尽。
+
+## 后记<span id="后记" />
+
+弹幕这种东西在将来或许能够规范化，成为一种与字幕类似的视频资源。这样每个视频都有对应的弹幕资源库，各种播放器也就能够从不同的弹幕资源库中加载并播放了。
+
+  [1]: img/danmu_player_code.png
+  [2]: img/danmu_player_controller.png
+  [3]: img/danmu_player_main_window.png
