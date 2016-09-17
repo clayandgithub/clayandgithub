@@ -6,9 +6,8 @@ date:       2016-09-16
 author:     "王维维"
 header-img: "img/post-bg-2015.jpg"
 tags:
-    - 中间件挑战赛
-    - NoSql数据库
-    - 查询系统
+    - 神经网络
+    - python
 ---
 
 > “温故而知新！”
