@@ -2,7 +2,7 @@
 layout:     post
 title:      "[笔记]基于python的神经网络算法实现"
 subtitle:   "FROM SCRATCH"
-date:       2016-08-25
+date:       2016-09-16
 author:     "王维维"
 header-img: "img/post-bg-2015.jpg"
 tags:
@@ -444,20 +444,29 @@ if __name__ == "__main__":
 * 算法1选用了sigmoid作为输出层的计算(多分类版本的logistic回归)，而算法2则是选用了softmax作为输出层的计算(注：会影响输出层的结果的计算)
 * 算法1选用了squared-error作为损失函数，而算法2选用的是cross-entropy作为损失函数(注：会影响calculate_loss函数的计算以及输出层的delta计算)
 
-#### **结果对比***
+#### **结果对比**
 
 ![算法1][1]
 
 ![算法2][2]
 
-结果大体上差不多，但是从细节上看，还是cross-entropy作为分类任务的损失函数更好一些。
+结果大体上差不多，但是从细节上看，还是算法2效果更好一些。主要的原因应该是cross-entropy比square-error更适合用作分类任务的损失函数。
 
 ## 后记<span id="后记" />
+
+**疑问:**
+
+```python
+#Ws[l] = Ws[l] - self.epsilon * (dWs[l] / num_examples + model.reg_lambda * Ws[l])
+#bs[l] = bs[l] - self.epsilon * (dbs[l] / num_examples)
+```
+
+在更新W和b时，因为，dW和db是所有测试数据累计的误差，按理说应该要除以num_xamples，可是结果却无法收敛。如果不除，倒是可以收敛，不知道是因为迭代次数不够还是其他什么原因导致的。
 
 **感悟：**
 
 * 温故而知新。
 * 深度学习水太深，但还是得去趟一趟，有些应用还是很有趣的。
 
-  [1]: img/sigmoid_squared_error_ann_classification.png
-  [2]: img/tanh_cross_entropy_ann_classification.png
+  [1]: /img/sigmoid_squared_error_ann_classification.png
+  [2]: /img/tanh_cross_entropy_ann_classification.png
