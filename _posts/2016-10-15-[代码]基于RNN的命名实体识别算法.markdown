@@ -1,0 +1,32 @@
+---
+layout:     post
+title:      "[代码]基于RNN的命名实体识别算法"
+subtitle:   "RNN"
+date:       2016-10-15
+author:     "王维维"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - ner
+    - keras
+    - RNN
+---
+
+> “命名实体识别与序列标注。”
+
+## 前言<span id="前言" />
+
+[跳过废话，直接看正文](#正文)
+
+自然语言处理领域中的很多问题都可以转换为序列标注问题，分词问题也可以。这里列出一种基于RNN的命名实体识别算法，以供参考。
+
+---
+
+## 正文<span id = "正文" />
+
+### 中文分词算法<span id="中文分词算法" />
+
+文件有好几个，这里不列出了，具体代码参考[github](https://github.com/clayandgithub/rnn_ner)
+
+## 后记<span id="后记" />
+
+没有后记
