@@ -1,0 +1,28 @@
+---
+layout:     post
+title:      "[其他]博客搬家"
+subtitle:   "回归CSDN"
+date:       2016-10-18
+author:     "王维维"
+header-img: "img/post-bg-2015.jpg"
+tags:
+    - csdn
+---
+
+> “(╯‵□′)╯︵┻━┻。”
+
+## 前言<span id="前言" />
+
+没有前言
+
+---
+
+## 正文<span id = "正文" />
+
+自己维护博客的格式解析和上传、打标签什么的太麻烦了，还是回到[CSDN](http://blog.csdn.net/clayanddev)写博客吧，这样能省不少事，把重心放在博客内容上。
+
+这个网站现在就纯粹是个人网站了。
+
+## 后记<span id="后记" />
+
+没有后记
