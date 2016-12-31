@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="关于人工智能，自然语言处理，Java WEB开发，后台架构 | 这里是 @WWW王维维 的个人博客。">
+    <meta name="keyword"  content="王维维, clayoverwind, 王维维的博客, clayoverwind Blog, 博客, 个人网站, 互联网, 后端, 架构, Java，Linux, 深度学习">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>[笔记]2016阿里中间件性能挑战赛(二) - 王维维的个人网站 | WWW Personal Website</title>
+
+    <link rel="canonical" href="http://localhost:4000/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">WWW</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/test/">Test</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-2015.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-2015.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#中间件挑战赛" title="中间件挑战赛">中间件挑战赛</a>
+                        
+                        <a class="tag" href="/tags/#Tair分布式存储" title="Tair分布式存储">Tair分布式存储</a>
+                        
+                        <a class="tag" href="/tags/#Jstorm实时流式计算框架" title="Jstorm实时流式计算框架">Jstorm实时流式计算框架</a>
+                        
+                        <a class="tag" href="/tags/#RocketMQ消息中间件" title="RocketMQ消息中间件">RocketMQ消息中间件</a>
+                        
+                    </div>
+                    <h1>[笔记]2016阿里中间件性能挑战赛(二)</h1>
+                    
+                    
+                    <h2 class="subheading">初赛</h2>
+                    
+                    <span class="meta">Posted by 王维维 on August 26, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>“大道至简。”</p>
+</blockquote>
+
+<h2 id="前言">前言<span id="前言"></span></h2>
+
+<p><a href="#正文">跳过废话，直接看正文</a></p>
+
+<p>通过上一篇的配置，我们就搭建好了初赛所需要的开发及测试的环境。接下来就是对赛题进行分析、拓扑设计以及码代码了。</p>
+
+<hr />
+
+<h2 id="正文">正文<span id="正文"></span></h2>
+
+<h3 id="目录">目录<span id="目录"></span></h3>
+
+<ul>
+  <li><a href="#题目分析">题目分析</a></li>
+  <li><a href="#拓扑设计">拓扑设计</a></li>
+  <li><a href="#代码展示">代码展示</a></li>
+  <li><a href="#关键优化">关键优化</a></li>
+</ul>
+
+<h3 id="题目分析">题目分析<span id="题目分析"></span></h3>
+
+<p><a href="https://tianchi.shuju.aliyun.com/competition/information.htm?raceId=231533">赛题官方介绍</a>
+初赛的任务就是写一个topology来完成对大量实时交易信息的简单计算，整个任务流程就是利用JStorm从RocketMQ拉取数据，按照要求实时计算出结果，并将结果写入Tair。</p>
+
+<h3 id="拓扑设计">拓扑设计<span id="拓扑设计"></span></h3>
+
+<p>在这个过程中尝试了许多种拓扑结构，最终的结构如下图所示：</p>
+
+<p><img src="/img/ali_middleware_topology.png" alt="初赛拓扑结构图" /></p>
+
+<p>从最后的结果来看，这种拓扑并不算很好。在初赛结束后与其他选手进行交流发现前几名的拓扑结构都设计的简单巧妙，因此了解到拓扑的流水线不能太长，否则消息在线程间的传递会占用大量时间，从而使得最后的平均处理时间变长。</p>
+
+<h3 id="代码展示">代码展示<span id="代码展示"></span></h3>
+
+<p>拓扑的结构代码如下：</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">alibaba</span><span class="o">.</span><span class="na">middleware</span><span class="o">.</span><span class="na">race</span><span class="o">.</span><span class="na">jstorm</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.slf4j.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.slf4j.LoggerFactory</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.alibaba.middleware.race.Constants</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.alibaba.middleware.race.RaceConfig</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.alibaba.middleware.race.util.FileUtil</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">backtype.storm.Config</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">backtype.storm.StormSubmitter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">backtype.storm.topology.TopologyBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">backtype.storm.tuple.Fields</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 这是一个很简单的例子
+ * 选手的拓扑提交到集群，我们是有超时设置的。每个选手的拓扑最多跑20分钟，一旦超过这个时间
+ * 我们会将选手拓扑杀掉。
+ */</span>
+
+<span class="cm">/**
+ * 选手拓扑入口类，我们定义必须是com.alibaba.middleware.race.jstorm.RaceTopology
+ * 因为我们后台对选手的git进行下载打包
+ * ，拓扑运行的入口类默认是com.alibaba.middleware.race.jstorm.RaceTopology； 所以这个主类路径一定要正确
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RaceTopology</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Logger</span> <span class="n">LOG</span> <span class="o">=</span> <span class="n">LoggerFactory</span><span class="o">.</span><span class="na">getLogger</span><span class="o">(</span><span class="n">RaceTopology</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+    <span class="cm">/** Spout **/</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">AllSpoutParallelism</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">ALLSPOUT</span> <span class="o">=</span> <span class="s">"AllSpout"</span><span class="o">;</span>
+
+    <span class="cm">/** Platform Distinguish **/</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">PlatformParallelism</span> <span class="o">=</span> <span class="mi">12</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">PLATFORMBOLT</span> <span class="o">=</span> <span class="s">"PlatformBolt"</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">TMPAYSTREAM</span> <span class="o">=</span> <span class="s">"TMPayStream"</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">TBPAYSTREAM</span> <span class="o">=</span> <span class="s">"TBPayStream"</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">ALLPAYSTREAM</span> <span class="o">=</span> <span class="s">"AllPayStream"</span><span class="o">;</span>
+
+    <span class="cm">/** PayMsgPartSum **/</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">PayMsgPartSumParallelism</span> <span class="o">=</span> <span class="mi">8</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">PAY_MSG_PART_SUM_BOLT</span> <span class="o">=</span> <span class="s">"PayMsgPartSum"</span><span class="o">;</span>
+
+    <span class="cm">/** Writer Bolt **/</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">TMCounterWriterParallelism</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">TMCOUNTERWRITERBOLT</span> <span class="o">=</span> <span class="s">"TMCounterWriter"</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">TBCounterWriterParallelism</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">TBCOUNTERWRITERBOLT</span> <span class="o">=</span> <span class="s">"TBCounterWriter"</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">RatioWriterParallelism</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">RATIOWRITERBOLT</span> <span class="o">=</span> <span class="s">"RatioWriter"</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="n">TopologyBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TopologyBuilder</span><span class="o">();</span>
+
+        <span class="cm">/** Spout **/</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">setSpout</span><span class="o">(</span><span class="n">ALLSPOUT</span><span class="o">,</span> <span class="k">new</span> <span class="n">AllSpout</span><span class="o">(),</span> <span class="n">AllSpoutParallelism</span><span class="o">);</span>
+
+        <span class="cm">/** Bolts receive tuples form spout **/</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">setBolt</span><span class="o">(</span><span class="n">PLATFORMBOLT</span><span class="o">,</span> <span class="k">new</span> <span class="n">PlatformDistinguish</span><span class="o">(),</span>
+                <span class="n">PlatformParallelism</span><span class="o">).</span><span class="na">fieldsGrouping</span><span class="o">(</span><span class="n">ALLSPOUT</span><span class="o">,</span>
+                <span class="k">new</span> <span class="nf">Fields</span><span class="o">(</span><span class="s">"orderID"</span><span class="o">));</span>
+
+        <span class="cm">/** tm/tb Writer Bolt **/</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">setBolt</span><span class="o">(</span><span class="n">TMCOUNTERWRITERBOLT</span><span class="o">,</span> <span class="k">new</span> <span class="n">TMCounterWriter</span><span class="o">(),</span>
+                <span class="n">TMCounterWriterParallelism</span><span class="o">).</span><span class="na">fieldsGrouping</span><span class="o">(</span><span class="n">PLATFORMBOLT</span><span class="o">,</span>
+                <span class="n">TMPAYSTREAM</span><span class="o">,</span> <span class="k">new</span> <span class="n">Fields</span><span class="o">(</span><span class="s">"time"</span><span class="o">));</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">setBolt</span><span class="o">(</span><span class="n">TBCOUNTERWRITERBOLT</span><span class="o">,</span> <span class="k">new</span> <span class="n">TBCounterWriter</span><span class="o">(),</span>
+                <span class="n">TBCounterWriterParallelism</span><span class="o">).</span><span class="na">fieldsGrouping</span><span class="o">(</span><span class="n">PLATFORMBOLT</span><span class="o">,</span>
+                <span class="n">TBPAYSTREAM</span><span class="o">,</span> <span class="k">new</span> <span class="n">Fields</span><span class="o">(</span><span class="s">"time"</span><span class="o">));</span>
+
+        <span class="cm">/** ratio related **/</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">setBolt</span><span class="o">(</span><span class="n">PAY_MSG_PART_SUM_BOLT</span><span class="o">,</span> <span class="k">new</span> <span class="n">PayMsgPartSum</span><span class="o">(),</span>
+                <span class="n">PayMsgPartSumParallelism</span><span class="o">).</span><span class="na">fieldsGrouping</span><span class="o">(</span><span class="n">PLATFORMBOLT</span><span class="o">,</span>
+                <span class="n">ALLPAYSTREAM</span><span class="o">,</span> <span class="k">new</span> <span class="n">Fields</span><span class="o">(</span><span class="s">"time"</span><span class="o">));</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">setBolt</span><span class="o">(</span><span class="n">RATIOWRITERBOLT</span><span class="o">,</span> <span class="k">new</span> <span class="n">NewRatioWriter</span><span class="o">(),</span>
+                <span class="n">RatioWriterParallelism</span><span class="o">).</span><span class="na">globalGrouping</span><span class="o">(</span><span class="n">PAY_MSG_PART_SUM_BOLT</span><span class="o">);</span>
+
+        <span class="n">String</span> <span class="n">topologyName</span> <span class="o">=</span> <span class="n">RaceConfig</span><span class="o">.</span><span class="na">JstormTopologyName</span><span class="o">;</span>
+
+        <span class="n">Config</span> <span class="n">conf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Config</span><span class="o">();</span>
+        <span class="n">conf</span><span class="o">.</span><span class="na">setNumWorkers</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+        <span class="n">conf</span><span class="o">.</span><span class="na">setNumAckers</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+
+        <span class="c1">// conf.setMessageTimeoutSecs(90);</span>
+        <span class="c1">// conf.setMaxSpoutPending(RaceConfig.SpoutMaxPending);</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">StormSubmitter</span><span class="o">.</span><span class="na">submitTopology</span><span class="o">(</span><span class="n">topologyName</span><span class="o">,</span> <span class="n">conf</span><span class="o">,</span>
+                    <span class="n">builder</span><span class="o">.</span><span class="na">createTopology</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// TODO Auto-generated catch block</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p><a href="https://github.com/clayandgithub/alibaba-middleware-preliminary">查看完整代码</a></p>
+
+<h3 id="关键优化">关键优化<span id="关键优化"></span></h3>
+
+<ul>
+  <li>根据日志分析拓扑的瓶颈，从而多次改变拓扑结构</li>
+  <li>减轻Spout工作量，并改为支持多线程操作, 这个优化十分重要，将性能提升了2-3倍</li>
+  <li>message去重(由于RocketMQ的消息在被多线程消费时是不安全的，因此需要在代码中进行去重)，这个优化将最后的准确率提升到了100%</li>
+  <li>其他还有一些优化手段，都是根据日志来进行调整的，并不是太关键</li>
+</ul>
+
+<h2 id="后记">后记<span id="后记"></span></h2>
+
+<p>通过初赛学到了实时流数据计算框架的一些基本知识，了解到了淘宝双十一后端的一些技术。</p>
+
+<p>从学习新技术的角度出发，我认为在初赛学到的东西比复赛还要多一些。年轻人嘛，不能总是用自己熟悉的东西，还是要多多去学习和拥抱新技术的，不然就真的是名副其实的码农了。</p>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/" data-toggle="tooltip" data-placement="top" title="[笔记]2016阿里中间件性能挑战赛(一)">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/08/27/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%89)/" data-toggle="tooltip" data-placement="top" title="[笔记]2016阿里中间件性能挑战赛(三)">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                        data-thread-key="/2016/08/26/[笔记]2016阿里中间件性能挑战赛(二)"
+                        data-title="[笔记]2016阿里中间件性能挑战赛(二)"
+                        data-url="http://localhost:4000/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/" >
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="#">WWW Blog</a></li>
+                    
+                        <li><a href="#">Foo</a></li>
+                    
+                        <li><a href="#">Bar</a></li>
+                    
+                        <li><a href="#">Example Friends</a></li>
+                    
+                        <li><a href="#">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'clayoverwind';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user };
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+                    <li>
+                        <a href="https://twitter.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/clayandgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; WWW 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'auto';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

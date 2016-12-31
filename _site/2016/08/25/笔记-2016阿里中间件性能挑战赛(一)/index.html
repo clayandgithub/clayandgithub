@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="关于人工智能，自然语言处理，Java WEB开发，后台架构 | 这里是 @WWW王维维 的个人博客。">
+    <meta name="keyword"  content="王维维, clayoverwind, 王维维的博客, clayoverwind Blog, 博客, 个人网站, 互联网, 后端, 架构, Java，Linux, 深度学习">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>[笔记]2016阿里中间件性能挑战赛(一) - 王维维的个人网站 | WWW Personal Website</title>
+
+    <link rel="canonical" href="http://localhost:4000/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">WWW</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/test/">Test</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-2015.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-2015.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Tair分布式存储" title="Tair分布式存储">Tair分布式存储</a>
+                        
+                        <a class="tag" href="/tags/#Jstorm实时流式计算框架" title="Jstorm实时流式计算框架">Jstorm实时流式计算框架</a>
+                        
+                        <a class="tag" href="/tags/#RocketMQ消息中间件" title="RocketMQ消息中间件">RocketMQ消息中间件</a>
+                        
+                    </div>
+                    <h1>[笔记]2016阿里中间件性能挑战赛(一)</h1>
+                    
+                    
+                    <h2 class="subheading">初赛环境配置(Tair、Jstorm、RocketMQ)</h2>
+                    
+                    <span class="meta">Posted by 王维维 on August 25, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>“Try something different！”</p>
+</blockquote>
+
+<h2 id="前言">前言<span id="前言"></span></h2>
+
+<p><a href="#正文">跳过废话，直接看正文</a></p>
+
+<p>2016.5-2016.8，阿里巴巴集团在天池大数据平台上举行了阿里中间件性能挑战赛，我和北京的两个队友参加了比赛。经历了初赛和复赛，最终获得了决赛的亚军。在这个过程中我收获颇丰，在此便记录下整个比赛的一些过程，并分享出初赛和复赛的代码。</p>
+
+<hr />
+
+<h2 id="正文">正文<span id="正文"></span></h2>
+
+<h3 id="目录">目录<span id="目录"></span></h3>
+
+<ul>
+  <li><a href="#初赛题目介绍">初赛题目介绍</a></li>
+  <li><a href="#Tair环境配置">Tair环境配置</a></li>
+  <li><a href="#RocketMQ环境配置">RocketMQ环境配置</a></li>
+  <li><a href="#Jstorm环境配置">Jstorm环境配置</a></li>
+</ul>
+
+<h3 id="初赛题目介绍">初赛题目介绍<span id="初赛题目介绍"></span></h3>
+
+<p><a href="https://tianchi.shuju.aliyun.com/competition/information.htm?raceId=231533">赛题官方介绍</a></p>
+
+<p>其实就是写一个topology，整个任务流程是利用JStorm从RocketMQ拉取数据，按照要求实时计算出结果，并将结果写入Tair。</p>
+
+<p>赛题所使用的三种产品是：</p>
+
+<ul>
+  <li>RocketMQ-3.2.6</li>
+  <li>Tair-2.3.4</li>
+  <li>JStorm-2.1.1</li>
+</ul>
+
+<p>帮助文档：</p>
+
+<ul>
+  <li><a href="http://code.taobao.org/p/tair/wiki/index/">Tair开发帮助文档</a></li>
+  <li><a href="https://github.com/alibaba/RocketMQ">RocketMQ 开发帮助文档</a></li>
+  <li><a href="https://github.com/alibaba/jstorm/wiki/JStorm-Chinese-Documentation">Jstorm开发帮助文档</a></li>
+</ul>
+
+<h3 id="tair环境配置">Tair环境配置<span id="Tair环境配置"></span></h3>
+
+<p>按照<a href="http://code.taobao.org/p/tair/wiki/deploy/">Tair部署帮助文档</a>配置即可</p>
+
+<blockquote>
+  <p>值得注意的是，在ubuntu上部署会遇到一些问题，解决起来有些麻烦，因此最好在centos上部署。</p>
+</blockquote>
+
+<h3 id="rocketmq环境配置">RocketMQ环境配置<span id="RocketMQ环境配置"></span></h3>
+
+<p>单机部署过程记录:</p>
+
+<ol>
+  <li>下载<a href="https://github.com/alibaba/RocketMQ/releases/download/v3.2.6/alibaba-rocketmq-3.2.6.tar.gz">release包</a>
+2.下载<a href="https://github.com/alibaba/RocketMQ">源码</a></li>
+  <li><code class="highlighter-rouge">cd /alibaba-rocketmq/bin</code> (第１步中解压出的文件夹)</li>
+  <li>启动namesrv
+  <code class="highlighter-rouge">nohup sh mqnamesrv &amp;</code>
+ (默认NameServer的监听端口是9876，可以用 <code class="highlighter-rouge">jps</code>和 <code class="highlighter-rouge">netstat -pan | grep 9876</code>　查看是否启动成功)</li>
+  <li>部署Broker(单Master模式)
+<code class="highlighter-rouge">nohup sh mqbroker -n "127.0.0.1:9876" -c ../conf/2m-2s-async/broker-a.properties &amp;</code></li>
+  <li>打开第2步中下载的文件夹RocketMQ,用IDE(Eclipse/IDEA)导入rocketmq-example项目</li>
+  <li>在<strong>com.alibaba.rocketmq.example.quickstart.Producer</strong>中的<code class="highlighter-rouge">DefaultMQProducer producer = new DefaultMQProducer...</code>这一行后加入<code class="highlighter-rouge">producer.setNamesrvAddr("127.0.0.1:9876");</code></li>
+  <li>在<strong>com.alibaba.rocketmq.example.quickstart.Consumer</strong>中的<code class="highlighter-rouge">DefaultMQPushConsumer consumer = new DefaultMQPushConsumer...</code>这一行后加入<code class="highlighter-rouge">consumer.setNamesrvAddr("127.0.0.1:9876");</code></li>
+  <li>先运行<strong>com.alibaba.rocketmq.example.quickstart.Consumer</strong>再运行<strong>com.alibaba.rocketmq.example.quickstart.Producer</strong>就可以看到输出信息</li>
+</ol>
+
+<p>其他参考资料：
+<a href="http://blog.csdn.net/a19881029/article/details/34446629">阿里RocketMQ Quick Start</a></p>
+
+<h3 id="jstorm环境配置">Jstorm环境配置<span id="Jstorm环境配置"></span></h3>
+
+<p>与storm一样，Jstorm的底层消息通信机制依赖zeromq/jzmq，另外，Jstorm通过zookeeper实现数据共享和协调服务，因此需要先安装这三个组件。</p>
+
+<p><strong>1. 安装zeromq</strong></p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>wget http://download.zeromq.org/zeromq-3.2.4.tar.gz
+tar zxf zeromq-3.2.4.tar.gz
+<span class="nb">cd </span>zeromq-3.2.4
+./configure
+make
+sudo make install
+sudo ldconfig
+</code></pre>
+</div>
+
+<p><strong>2. 安装jzmq</strong></p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>wget https://github.com/zeromq/jzmq/tarball/master -O jzmq.tar.gz
+tar zxf jzmq.tar.gz
+<span class="nb">cd </span>jzmq/jzmq-jni
+./autogen.sh
+./configure
+make
+sudo make install
+</code></pre>
+</div>
+
+<p><strong>3. 安装zookeeper</strong></p>
+
+<p>下载地址:<a href="http://apache.claz.org/zookeeper/stable/zookeeper-3.4.8.tar.gz">zookeeper-3.4.8.tar.gz</a></p>
+
+<p>单机或集群的配置过程参考<a href="http://blog.csdn.net/hi_kevin/article/details/7089358">ZooKeeper的安装</a>即可</p>
+
+<p><strong>4. 安装jstorm</strong></p>
+
+<p>下载地址:<a href="https://github.com/alibaba/jstorm/wiki/Downloads中的taobao-jstorm-2.1.1.rpm">taobao-jstorm-2.1.1.rpm</a></p>
+
+<p>操作系统环境:ubuntu14.04</p>
+
+<ol>
+  <li>新建用户admin和用户组admin</li>
+  <li>安装rpm包</li>
+  <li><a href="http://blog.csdn.net/leishenop/article/details/51385567">集群配置</a></li>
+  <li><a href="https://github.com/alibaba/jstorm/wiki/%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85">单机配置</a>, 在同一台机器上启动nimbus和supervisor）</li>
+</ol>
+
+<p><strong>5. 全部完成后使用jps命令应该能够看到如下进程</strong></p>
+
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="gp">admin@ubuntu:~$ </span>jps
+9840 NimbusServer
+8051 Bootstrap
+9573 QuorumPeerMain
+10086 Supervisor
+8924 Jps
+</code></pre>
+</div>
+
+<h2 id="后记">后记<span id="后记"></span></h2>
+
+<p>之前完全没有接触过这三个框架，前前后后共花了两天时间才完成配置，在这个过程中遇到许多坑，因此浪费了不少时间。希望这个笔记能够帮助大家绕过这些坑。</p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/08/24/%E7%AC%94%E8%AE%B0-github%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E6%AD%A5%E9%AA%A4/" data-toggle="tooltip" data-placement="top" title="[笔记]github个人主页搭建步骤">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/" data-toggle="tooltip" data-placement="top" title="[笔记]2016阿里中间件性能挑战赛(二)">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                        data-thread-key="/2016/08/25/[笔记]2016阿里中间件性能挑战赛(一)"
+                        data-title="[笔记]2016阿里中间件性能挑战赛(一)"
+                        data-url="http://localhost:4000/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/" >
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="#">WWW Blog</a></li>
+                    
+                        <li><a href="#">Foo</a></li>
+                    
+                        <li><a href="#">Bar</a></li>
+                    
+                        <li><a href="#">Example Friends</a></li>
+                    
+                        <li><a href="#">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'clayoverwind';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user };
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+                    <li>
+                        <a href="https://twitter.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/clayandgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; WWW 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'auto';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

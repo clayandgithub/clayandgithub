@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="关于人工智能，自然语言处理，Java WEB开发，后台架构 | 这里是 @WWW王维维 的个人博客。">
+    <meta name="keyword"  content="王维维, clayoverwind, 王维维的博客, clayoverwind Blog, 博客, 个人网站, 互联网, 后端, 架构, Java，Linux, 深度学习">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Tags - 王维维的个人网站 | WWW Personal Website</title>
+
+    <link rel="canonical" href="http://localhost:4000/tags/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">WWW</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/test/">Test</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/tag-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>Tags</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">Hey, this is WWW.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <!-- 标签云 -->
+			<div id='tag_cloud' class="tags">
+				
+				<a href="#Markdown" title="Markdown" rel="1">Markdown</a>
+				
+				<a href="#单元测试" title="单元测试" rel="1">单元测试</a>
+				
+				<a href="#Gtest" title="Gtest" rel="1">Gtest</a>
+				
+				<a href="#cmake" title="cmake" rel="1">cmake</a>
+				
+				<a href="#github-page" title="github-page" rel="1">github-page</a>
+				
+				<a href="#个人主页" title="个人主页" rel="1">个人主页</a>
+				
+				<a href="#Tair分布式存储" title="Tair分布式存储" rel="2">Tair分布式存储</a>
+				
+				<a href="#Jstorm实时流式计算框架" title="Jstorm实时流式计算框架" rel="2">Jstorm实时流式计算框架</a>
+				
+				<a href="#RocketMQ消息中间件" title="RocketMQ消息中间件" rel="2">RocketMQ消息中间件</a>
+				
+				<a href="#中间件挑战赛" title="中间件挑战赛" rel="2">中间件挑战赛</a>
+				
+				<a href="#NoSql数据库" title="NoSql数据库" rel="1">NoSql数据库</a>
+				
+				<a href="#查询系统" title="查询系统" rel="1">查询系统</a>
+				
+				<a href="#java" title="java" rel="4">java</a>
+				
+				<a href="#swing" title="swing" rel="3">swing</a>
+				
+				<a href="#工具代码" title="工具代码" rel="3">工具代码</a>
+				
+				<a href="#软件开发" title="软件开发" rel="1">软件开发</a>
+				
+				<a href="#MVP架构模式" title="MVP架构模式" rel="1">MVP架构模式</a>
+				
+				<a href="#神经网络" title="神经网络" rel="2">神经网络</a>
+				
+				<a href="#python" title="python" rel="1">python</a>
+				
+				<a href="#theano" title="theano" rel="2">theano</a>
+				
+				<a href="#gpu" title="gpu" rel="1">gpu</a>
+				
+				<a href="#keras" title="keras" rel="4">keras</a>
+				
+				<a href="#RNN" title="RNN" rel="4">RNN</a>
+				
+				<a href="#word segmentation" title="word segmentation" rel="1">word segmentation</a>
+				
+				<a href="#ner" title="ner" rel="1">ner</a>
+				
+				<a href="#generate new text" title="generate new text" rel="1">generate new text</a>
+				
+				<a href="#csdn" title="csdn" rel="1">csdn</a>
+				
+			</div>
+
+            <!-- 标签列表 -->
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="Markdown">
+                    <span class="tag-text">Markdown</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2010-01-21">2010-01-21</time>
+				  <a href="/2010/01/21/%E6%A8%A1%E6%9D%BF-Markdown%E6%A8%A1%E6%9D%BF/" title="[模板]Markdown模板">[模板]Markdown模板</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2010/01/21/%E6%A8%A1%E6%9D%BF-Markdown%E6%A8%A1%E6%9D%BF/">
+				        <h2 class="post-title">
+                            [模板]Markdown模板
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            Markdown模板
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2010-01-21</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="单元测试">
+                    <span class="tag-text">单元测试</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-24">2016-08-24</time>
+				  <a href="/2016/08/24/%E5%8E%9F%E5%88%9B-C++%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6Gtest%E7%9A%84%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%BF%87%E7%A8%8B/" title="[原创]C++单元测试框架Gtest的配置与使用过程">[原创]C++单元测试框架Gtest的配置与使用过程</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/24/%E5%8E%9F%E5%88%9B-C++%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6Gtest%E7%9A%84%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%BF%87%E7%A8%8B/">
+				        <h2 class="post-title">
+                            [原创]C++单元测试框架Gtest的配置与使用过程
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            Gtest笔记
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-24</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="Gtest">
+                    <span class="tag-text">Gtest</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-24">2016-08-24</time>
+				  <a href="/2016/08/24/%E5%8E%9F%E5%88%9B-C++%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6Gtest%E7%9A%84%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%BF%87%E7%A8%8B/" title="[原创]C++单元测试框架Gtest的配置与使用过程">[原创]C++单元测试框架Gtest的配置与使用过程</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/24/%E5%8E%9F%E5%88%9B-C++%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6Gtest%E7%9A%84%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%BF%87%E7%A8%8B/">
+				        <h2 class="post-title">
+                            [原创]C++单元测试框架Gtest的配置与使用过程
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            Gtest笔记
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-24</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="cmake">
+                    <span class="tag-text">cmake</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-24">2016-08-24</time>
+				  <a href="/2016/08/24/%E5%8E%9F%E5%88%9B-C++%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6Gtest%E7%9A%84%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%BF%87%E7%A8%8B/" title="[原创]C++单元测试框架Gtest的配置与使用过程">[原创]C++单元测试框架Gtest的配置与使用过程</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/24/%E5%8E%9F%E5%88%9B-C++%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6Gtest%E7%9A%84%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%BF%87%E7%A8%8B/">
+				        <h2 class="post-title">
+                            [原创]C++单元测试框架Gtest的配置与使用过程
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            Gtest笔记
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-24</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="github-page">
+                    <span class="tag-text">github-page</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-24">2016-08-24</time>
+				  <a href="/2016/08/24/%E7%AC%94%E8%AE%B0-github%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E6%AD%A5%E9%AA%A4/" title="[笔记]github个人主页搭建步骤">[笔记]github个人主页搭建步骤</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/24/%E7%AC%94%E8%AE%B0-github%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E6%AD%A5%E9%AA%A4/">
+				        <h2 class="post-title">
+                            [笔记]github个人主页搭建步骤
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            Github-page笔记
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-24</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="个人主页">
+                    <span class="tag-text">个人主页</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-24">2016-08-24</time>
+				  <a href="/2016/08/24/%E7%AC%94%E8%AE%B0-github%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E6%AD%A5%E9%AA%A4/" title="[笔记]github个人主页搭建步骤">[笔记]github个人主页搭建步骤</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/24/%E7%AC%94%E8%AE%B0-github%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5%E6%90%AD%E5%BB%BA%E6%AD%A5%E9%AA%A4/">
+				        <h2 class="post-title">
+                            [笔记]github个人主页搭建步骤
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            Github-page笔记
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-24</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="Tair分布式存储">
+                    <span class="tag-text">Tair分布式存储</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-26">2016-08-26</time>
+				  <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/" title="[笔记]2016阿里中间件性能挑战赛(二)">[笔记]2016阿里中间件性能挑战赛(二)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(二)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            初赛
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-26</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-25">2016-08-25</time>
+				  <a href="/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/" title="[笔记]2016阿里中间件性能挑战赛(一)">[笔记]2016阿里中间件性能挑战赛(一)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(一)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            初赛环境配置(Tair、Jstorm、RocketMQ)
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-25</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="Jstorm实时流式计算框架">
+                    <span class="tag-text">Jstorm实时流式计算框架</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-26">2016-08-26</time>
+				  <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/" title="[笔记]2016阿里中间件性能挑战赛(二)">[笔记]2016阿里中间件性能挑战赛(二)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(二)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            初赛
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-26</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-25">2016-08-25</time>
+				  <a href="/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/" title="[笔记]2016阿里中间件性能挑战赛(一)">[笔记]2016阿里中间件性能挑战赛(一)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(一)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            初赛环境配置(Tair、Jstorm、RocketMQ)
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-25</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="RocketMQ消息中间件">
+                    <span class="tag-text">RocketMQ消息中间件</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-26">2016-08-26</time>
+				  <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/" title="[笔记]2016阿里中间件性能挑战赛(二)">[笔记]2016阿里中间件性能挑战赛(二)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(二)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            初赛
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-26</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-25">2016-08-25</time>
+				  <a href="/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/" title="[笔记]2016阿里中间件性能挑战赛(一)">[笔记]2016阿里中间件性能挑战赛(一)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/25/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%80)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(一)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            初赛环境配置(Tair、Jstorm、RocketMQ)
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-25</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="中间件挑战赛">
+                    <span class="tag-text">中间件挑战赛</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-27">2016-08-27</time>
+				  <a href="/2016/08/27/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%89)/" title="[笔记]2016阿里中间件性能挑战赛(三)">[笔记]2016阿里中间件性能挑战赛(三)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/27/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%89)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(三)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            复赛
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-27</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-26">2016-08-26</time>
+				  <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/" title="[笔记]2016阿里中间件性能挑战赛(二)">[笔记]2016阿里中间件性能挑战赛(二)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/26/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%BA%8C)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(二)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            初赛
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-26</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="NoSql数据库">
+                    <span class="tag-text">NoSql数据库</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-27">2016-08-27</time>
+				  <a href="/2016/08/27/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%89)/" title="[笔记]2016阿里中间件性能挑战赛(三)">[笔记]2016阿里中间件性能挑战赛(三)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/27/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%89)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(三)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            复赛
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-27</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="查询系统">
+                    <span class="tag-text">查询系统</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-08-27">2016-08-27</time>
+				  <a href="/2016/08/27/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%89)/" title="[笔记]2016阿里中间件性能挑战赛(三)">[笔记]2016阿里中间件性能挑战赛(三)</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/08/27/%E7%AC%94%E8%AE%B0-2016%E9%98%BF%E9%87%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%80%A7%E8%83%BD%E6%8C%91%E6%88%98%E8%B5%9B(%E4%B8%89)/">
+				        <h2 class="post-title">
+                            [笔记]2016阿里中间件性能挑战赛(三)
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            复赛
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-08-27</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="java">
+                    <span class="tag-text">java</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-13">2016-09-13</time>
+				  <a href="/2016/09/13/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-Swing%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%92%AD%E6%94%BE%E5%99%A8%E6%97%B6%E9%97%B4%E8%BD%B4/" title="[工具代码]Swing实现的播放器时间轴">[工具代码]Swing实现的播放器时间轴</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/13/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-Swing%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%92%AD%E6%94%BE%E5%99%A8%E6%97%B6%E9%97%B4%E8%BD%B4/">
+				        <h2 class="post-title">
+                            [工具代码]Swing实现的播放器时间轴
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-13</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/" title="[软件开发]基于swing开发的弹幕播放器">[软件开发]基于swing开发的弹幕播放器</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/">
+				        <h2 class="post-title">
+                            [软件开发]基于swing开发的弹幕播放器
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            开发记录
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BF%E7%94%A8Java%E7%88%AC%E5%8F%96b%E7%AB%99%E5%BC%B9%E5%B9%95%E6%96%87%E4%BB%B6/" title="[工具代码]使用Java爬取b站弹幕文件">[工具代码]使用Java爬取b站弹幕文件</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BF%E7%94%A8Java%E7%88%AC%E5%8F%96b%E7%AB%99%E5%BC%B9%E5%B9%95%E6%96%87%E4%BB%B6/">
+				        <h2 class="post-title">
+                            [工具代码]使用Java爬取b站弹幕文件
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BFJTextfield%E5%85%B7%E6%9C%89%E9%BB%98%E8%AE%A4%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97%E7%9A%84%E5%8A%9F%E8%83%BD/" title="[工具代码]使JTextfield具有默认提示文字的功能">[工具代码]使JTextfield具有默认提示文字的功能</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BFJTextfield%E5%85%B7%E6%9C%89%E9%BB%98%E8%AE%A4%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97%E7%9A%84%E5%8A%9F%E8%83%BD/">
+				        <h2 class="post-title">
+                            [工具代码]使JTextfield具有默认提示文字的功能
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="swing">
+                    <span class="tag-text">swing</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-13">2016-09-13</time>
+				  <a href="/2016/09/13/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-Swing%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%92%AD%E6%94%BE%E5%99%A8%E6%97%B6%E9%97%B4%E8%BD%B4/" title="[工具代码]Swing实现的播放器时间轴">[工具代码]Swing实现的播放器时间轴</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/13/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-Swing%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%92%AD%E6%94%BE%E5%99%A8%E6%97%B6%E9%97%B4%E8%BD%B4/">
+				        <h2 class="post-title">
+                            [工具代码]Swing实现的播放器时间轴
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-13</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/" title="[软件开发]基于swing开发的弹幕播放器">[软件开发]基于swing开发的弹幕播放器</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/">
+				        <h2 class="post-title">
+                            [软件开发]基于swing开发的弹幕播放器
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            开发记录
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BFJTextfield%E5%85%B7%E6%9C%89%E9%BB%98%E8%AE%A4%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97%E7%9A%84%E5%8A%9F%E8%83%BD/" title="[工具代码]使JTextfield具有默认提示文字的功能">[工具代码]使JTextfield具有默认提示文字的功能</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BFJTextfield%E5%85%B7%E6%9C%89%E9%BB%98%E8%AE%A4%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97%E7%9A%84%E5%8A%9F%E8%83%BD/">
+				        <h2 class="post-title">
+                            [工具代码]使JTextfield具有默认提示文字的功能
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="工具代码">
+                    <span class="tag-text">工具代码</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-13">2016-09-13</time>
+				  <a href="/2016/09/13/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-Swing%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%92%AD%E6%94%BE%E5%99%A8%E6%97%B6%E9%97%B4%E8%BD%B4/" title="[工具代码]Swing实现的播放器时间轴">[工具代码]Swing实现的播放器时间轴</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/13/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-Swing%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%92%AD%E6%94%BE%E5%99%A8%E6%97%B6%E9%97%B4%E8%BD%B4/">
+				        <h2 class="post-title">
+                            [工具代码]Swing实现的播放器时间轴
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-13</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BF%E7%94%A8Java%E7%88%AC%E5%8F%96b%E7%AB%99%E5%BC%B9%E5%B9%95%E6%96%87%E4%BB%B6/" title="[工具代码]使用Java爬取b站弹幕文件">[工具代码]使用Java爬取b站弹幕文件</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BF%E7%94%A8Java%E7%88%AC%E5%8F%96b%E7%AB%99%E5%BC%B9%E5%B9%95%E6%96%87%E4%BB%B6/">
+				        <h2 class="post-title">
+                            [工具代码]使用Java爬取b站弹幕文件
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BFJTextfield%E5%85%B7%E6%9C%89%E9%BB%98%E8%AE%A4%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97%E7%9A%84%E5%8A%9F%E8%83%BD/" title="[工具代码]使JTextfield具有默认提示文字的功能">[工具代码]使JTextfield具有默认提示文字的功能</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E5%B7%A5%E5%85%B7%E4%BB%A3%E7%A0%81-%E4%BD%BFJTextfield%E5%85%B7%E6%9C%89%E9%BB%98%E8%AE%A4%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97%E7%9A%84%E5%8A%9F%E8%83%BD/">
+				        <h2 class="post-title">
+                            [工具代码]使JTextfield具有默认提示文字的功能
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            工具代码
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="软件开发">
+                    <span class="tag-text">软件开发</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/" title="[软件开发]基于swing开发的弹幕播放器">[软件开发]基于swing开发的弹幕播放器</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/">
+				        <h2 class="post-title">
+                            [软件开发]基于swing开发的弹幕播放器
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            开发记录
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="MVP架构模式">
+                    <span class="tag-text">MVP架构模式</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-12">2016-09-12</time>
+				  <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/" title="[软件开发]基于swing开发的弹幕播放器">[软件开发]基于swing开发的弹幕播放器</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/12/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91-%E5%9F%BA%E4%BA%8Eswing%E5%BC%80%E5%8F%91%E7%9A%84%E5%BC%B9%E5%B9%95%E6%92%AD%E6%94%BE%E5%99%A8/">
+				        <h2 class="post-title">
+                            [软件开发]基于swing开发的弹幕播放器
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            开发记录
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-12</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="神经网络">
+                    <span class="tag-text">神经网络</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-21">2016-09-21</time>
+				  <a href="/2016/09/21/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Etheano%E5%AE%9E%E7%8E%B0gpu%E7%89%88%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95/" title="[笔记]基于theano实现gpu版的神经网络算法">[笔记]基于theano实现gpu版的神经网络算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/21/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Etheano%E5%AE%9E%E7%8E%B0gpu%E7%89%88%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [笔记]基于theano实现gpu版的神经网络算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            First program on gpu
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-21</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-16">2016-09-16</time>
+				  <a href="/2016/09/16/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Epython%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0/" title="[笔记]基于python的神经网络算法实现">[笔记]基于python的神经网络算法实现</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/16/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Epython%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0/">
+				        <h2 class="post-title">
+                            [笔记]基于python的神经网络算法实现
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            FROM SCRATCH
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-16</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="python">
+                    <span class="tag-text">python</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-16">2016-09-16</time>
+				  <a href="/2016/09/16/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Epython%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0/" title="[笔记]基于python的神经网络算法实现">[笔记]基于python的神经网络算法实现</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/16/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Epython%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0/">
+				        <h2 class="post-title">
+                            [笔记]基于python的神经网络算法实现
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            FROM SCRATCH
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-16</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="theano">
+                    <span class="tag-text">theano</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/" title="[代码]三种循环神经网络(RNN)算法的实现">[代码]三种循环神经网络(RNN)算法的实现</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+				        <h2 class="post-title">
+                            [代码]三种循环神经网络(RNN)算法的实现
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            From scratch、Theano、Keras
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-21">2016-09-21</time>
+				  <a href="/2016/09/21/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Etheano%E5%AE%9E%E7%8E%B0gpu%E7%89%88%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95/" title="[笔记]基于theano实现gpu版的神经网络算法">[笔记]基于theano实现gpu版的神经网络算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/21/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Etheano%E5%AE%9E%E7%8E%B0gpu%E7%89%88%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [笔记]基于theano实现gpu版的神经网络算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            First program on gpu
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-21</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="gpu">
+                    <span class="tag-text">gpu</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-09-21">2016-09-21</time>
+				  <a href="/2016/09/21/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Etheano%E5%AE%9E%E7%8E%B0gpu%E7%89%88%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95/" title="[笔记]基于theano实现gpu版的神经网络算法">[笔记]基于theano实现gpu版的神经网络算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/09/21/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Etheano%E5%AE%9E%E7%8E%B0gpu%E7%89%88%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [笔记]基于theano实现gpu版的神经网络算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            First program on gpu
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-09-21</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="keras">
+                    <span class="tag-text">keras</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的文本生成算法">[代码]基于RNN的文本生成算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的文本生成算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E5%91%BD%E5%90%8D%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的命名实体识别算法">[代码]基于RNN的命名实体识别算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E5%91%BD%E5%90%8D%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的命名实体识别算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的中文分词算法">[代码]基于RNN的中文分词算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的中文分词算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/" title="[代码]三种循环神经网络(RNN)算法的实现">[代码]三种循环神经网络(RNN)算法的实现</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+				        <h2 class="post-title">
+                            [代码]三种循环神经网络(RNN)算法的实现
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            From scratch、Theano、Keras
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="RNN">
+                    <span class="tag-text">RNN</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的文本生成算法">[代码]基于RNN的文本生成算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的文本生成算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E5%91%BD%E5%90%8D%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的命名实体识别算法">[代码]基于RNN的命名实体识别算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E5%91%BD%E5%90%8D%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的命名实体识别算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的中文分词算法">[代码]基于RNN的中文分词算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的中文分词算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/" title="[代码]三种循环神经网络(RNN)算法的实现">[代码]三种循环神经网络(RNN)算法的实现</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+				        <h2 class="post-title">
+                            [代码]三种循环神经网络(RNN)算法的实现
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            From scratch、Theano、Keras
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="word segmentation">
+                    <span class="tag-text">word segmentation</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的中文分词算法">[代码]基于RNN的中文分词算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的中文分词算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="ner">
+                    <span class="tag-text">ner</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E5%91%BD%E5%90%8D%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的命名实体识别算法">[代码]基于RNN的命名实体识别算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E5%91%BD%E5%90%8D%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的命名实体识别算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="generate new text">
+                    <span class="tag-text">generate new text</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-15">2016-10-15</time>
+				  <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/" title="[代码]基于RNN的文本生成算法">[代码]基于RNN的文本生成算法</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/">
+				        <h2 class="post-title">
+                            [代码]基于RNN的文本生成算法
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            RNN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-15</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+			<div class="one-tag-list">
+			  	<span class="fa fa-tag listing-seperator" id="csdn">
+                    <span class="tag-text">csdn</span>
+                </span>
+				
+				  <!-- <li class="listing-item">
+				  <time datetime="2016-10-18">2016-10-18</time>
+				  <a href="/2016/10/18/%E5%85%B6%E4%BB%96-%E5%8D%9A%E5%AE%A2%E6%90%AC%E5%AE%B6/" title="[其他]博客搬家">[其他]博客搬家</a>
+				  </li> -->
+				 <div class="post-preview">
+				    <a href="/2016/10/18/%E5%85%B6%E4%BB%96-%E5%8D%9A%E5%AE%A2%E6%90%AC%E5%AE%B6/">
+				        <h2 class="post-title">
+                            [其他]博客搬家
+				        </h2>
+				        
+				        <h3 class="post-subtitle">
+				            回归CSDN
+				        </h3>
+				        
+				    </a>
+				    <!-- <p class="post-meta">2016-10-18</p> -->
+				</div>
+				<hr>
+				
+			</div>
+			
+
+		</div>
+	</div>
+</div>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+                    <li>
+                        <a href="https://twitter.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/clayandgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; WWW 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'auto';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="关于人工智能，自然语言处理，Java WEB开发，后台架构 | 这里是 @WWW王维维 的个人博客。">
+    <meta name="keyword"  content="王维维, clayoverwind, 王维维的博客, clayoverwind Blog, 博客, 个人网站, 互联网, 后端, 架构, Java，Linux, 深度学习">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>[代码]三种循环神经网络(RNN)算法的实现 - 王维维的个人网站 | WWW Personal Website</title>
+
+    <link rel="canonical" href="http://localhost:4000/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">WWW</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/test/">Test</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-2015.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-2015.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#theano" title="theano">theano</a>
+                        
+                        <a class="tag" href="/tags/#keras" title="keras">keras</a>
+                        
+                        <a class="tag" href="/tags/#RNN" title="RNN">RNN</a>
+                        
+                    </div>
+                    <h1>[代码]三种循环神经网络(RNN)算法的实现</h1>
+                    
+                    
+                    <h2 class="subheading">From scratch、Theano、Keras</h2>
+                    
+                    <span class="meta">Posted by 王维维 on October 15, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>“由简至繁，再而至简！”</p>
+</blockquote>
+
+<h2 id="前言">前言<span id="前言"></span></h2>
+
+<p><a href="#正文">跳过废话，直接看正文</a></p>
+
+<p>经过一段时间的学习，我初步了解了RNN的基本原理和实现方法，在这里列出三种不同的RNN实现方法，以供参考。</p>
+
+<p>RNN的原理在网上能找到很多，我这里就不说了，说出来也不会比那些更好，这里先推荐一个<a href="http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/">RNN教程</a>，讲的很好，四个post看完基本就能自己实现RNN了。</p>
+
+<hr />
+
+<h2 id="正文">正文<span id="正文"></span></h2>
+
+<h3 id="rnn-from-scratch">RNN From Scratch<span id="Scratch"></span></h3>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">class</span> <span class="nc">RNNNumpy</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">bptt_truncate</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="c"># Assign instance variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">word_dim</span> <span class="o">=</span> <span class="n">word_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bptt_truncate</span> <span class="o">=</span> <span class="n">bptt_truncate</span>
+        <span class="c"># Randomly initialize the network parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">word_dim</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">word_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">word_dim</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">word_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">forward_propagation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c"># The total number of time steps</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c"># During forward propagation we save all hidden states in s because need them later.</span>
+        <span class="c"># We add one additional element for the initial hidden, which we set to 0</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">T</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">))</span>
+        <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="c"># The outputs at each time step. Again, we save them for later.</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_dim</span><span class="p">))</span>
+        <span class="c"># For each time step...</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+            <span class="c"># Note that we are indxing U by x[t]. This is the same as multiplying U with a one-hot vector.</span>
+            <span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">[:,</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">o</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">o</span><span class="p">,</span> <span class="n">s</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c"># Perform forward propagation and return index of the highest score</span>
+        <span class="n">o</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate_total_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># For each sentence...</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span>
+            <span class="n">o</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="c"># We only care about our prediction of the "correct" words</span>
+            <span class="n">correct_word_predictions</span> <span class="o">=</span> <span class="n">o</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">])),</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="c"># Add to the loss based on how off we were</span>
+            <span class="n">L</span> <span class="o">+=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">correct_word_predictions</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">L</span>
+
+    <span class="k">def</span> <span class="nf">calculate_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="c"># Divide the total loss by the number of training examples</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">y_i</span><span class="p">)</span> <span class="k">for</span> <span class="n">y_i</span> <span class="ow">in</span> <span class="n">y</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_total_loss</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
+
+    <span class="k">def</span> <span class="nf">bptt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="c"># Perform forward propagation</span>
+        <span class="n">o</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c"># We accumulate the gradients in these variables</span>
+        <span class="n">dLdU</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">dLdV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">dLdW</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">delta_o</span> <span class="o">=</span> <span class="n">o</span>
+        <span class="n">delta_o</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="n">y</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">1.</span>
+        <span class="c"># For each output backwards...</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">dLdV</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">delta_o</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="c"># Initial delta calculation</span>
+            <span class="n">delta_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">delta_o</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="c"># Backpropagation through time (for at most self.bptt_truncate steps)</span>
+            <span class="k">for</span> <span class="n">bptt_step</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bptt_truncate</span><span class="p">),</span> <span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c"># print "Backpropagation step t=%d bptt step=%d " % (t, bptt_step)</span>
+                <span class="n">dLdW</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="n">bptt_step</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>              
+                <span class="n">dLdU</span><span class="p">[:,</span><span class="n">x</span><span class="p">[</span><span class="n">bptt_step</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">delta_t</span>
+                <span class="c"># Update delta for next step</span>
+                <span class="n">delta_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="n">bptt_step</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">dLdU</span><span class="p">,</span> <span class="n">dLdV</span><span class="p">,</span> <span class="n">dLdW</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">gradient_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">error_threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="c"># Calculate the gradients using backpropagation. We want to checker if these are correct.</span>
+        <span class="n">bptt_gradients</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bptt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c"># List of all parameters we want to check.</span>
+        <span class="n">model_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">'U'</span><span class="p">,</span> <span class="s">'V'</span><span class="p">,</span> <span class="s">'W'</span><span class="p">]</span>
+        <span class="c"># Gradient check for each parameter</span>
+        <span class="k">for</span> <span class="n">pidx</span><span class="p">,</span> <span class="n">pname</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model_parameters</span><span class="p">):</span>
+            <span class="c"># Get the actual parameter value from the mode, e.g. model.W</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">pname</span><span class="p">)(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">"Performing gradient check for parameter </span><span class="si">%</span><span class="s">s with size </span><span class="si">%</span><span class="s">d."</span> <span class="o">%</span> <span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+            <span class="c"># Iterate over each element of the parameter matrix, e.g. (0,0), (0,1), ...</span>
+            <span class="n">it</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="p">[</span><span class="s">'multi_index'</span><span class="p">],</span> <span class="n">op_flags</span><span class="o">=</span><span class="p">[</span><span class="s">'readwrite'</span><span class="p">])</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">it</span><span class="o">.</span><span class="n">finished</span><span class="p">:</span>
+                <span class="n">ix</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="n">multi_index</span>
+                <span class="c"># Save the original value so we can reset it later</span>
+                <span class="n">original_value</span> <span class="o">=</span> <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+                <span class="c"># Estimate the gradient using (f(x+h) - f(x-h))/(2*h)</span>
+                <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_value</span> <span class="o">+</span> <span class="n">h</span>
+                <span class="n">gradplus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_total_loss</span><span class="p">([</span><span class="n">x</span><span class="p">],[</span><span class="n">y</span><span class="p">])</span>
+                <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_value</span> <span class="o">-</span> <span class="n">h</span>
+                <span class="n">gradminus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_total_loss</span><span class="p">([</span><span class="n">x</span><span class="p">],[</span><span class="n">y</span><span class="p">])</span>
+                <span class="n">estimated_gradient</span> <span class="o">=</span> <span class="p">(</span><span class="n">gradplus</span> <span class="o">-</span> <span class="n">gradminus</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">h</span><span class="p">)</span>
+                <span class="c"># Reset parameter to original value</span>
+                <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_value</span>
+                <span class="c"># The gradient for this parameter calculated using backpropagation</span>
+                <span class="n">backprop_gradient</span> <span class="o">=</span> <span class="n">bptt_gradients</span><span class="p">[</span><span class="n">pidx</span><span class="p">][</span><span class="n">ix</span><span class="p">]</span>
+                <span class="c"># calculate The relative error: (|x - y|/(|x| + |y|))</span>
+                <span class="n">relative_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">backprop_gradient</span> <span class="o">-</span> <span class="n">estimated_gradient</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">backprop_gradient</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">estimated_gradient</span><span class="p">))</span>
+                <span class="c"># If the error is to large fail the gradient check</span>
+                <span class="k">if</span> <span class="n">relative_error</span> <span class="o">&gt;</span> <span class="n">error_threshold</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">"Gradient Check ERROR: parameter=</span><span class="si">%</span><span class="s">s ix=</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">ix</span><span class="p">)</span>
+                    <span class="k">print</span> <span class="s">"+h Loss: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">gradplus</span>
+                    <span class="k">print</span> <span class="s">"-h Loss: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">gradminus</span>
+                    <span class="k">print</span> <span class="s">"Estimated_gradient: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">estimated_gradient</span>
+                    <span class="k">print</span> <span class="s">"Backpropagation gradient: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">backprop_gradient</span>
+                    <span class="k">print</span> <span class="s">"Relative Error: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">relative_error</span>
+                    <span class="k">return</span>
+                <span class="n">it</span><span class="o">.</span><span class="n">iternext</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s">"Gradient check for parameter </span><span class="si">%</span><span class="s">s passed."</span> <span class="o">%</span> <span class="p">(</span><span class="n">pname</span><span class="p">)</span>
+            
+    <span class="c"># Performs one step of SGD.</span>
+    <span class="k">def</span> <span class="nf">sgd_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">):</span>
+        <span class="c"># Calculate the gradients</span>
+        <span class="n">dLdU</span><span class="p">,</span> <span class="n">dLdV</span><span class="p">,</span> <span class="n">dLdW</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bptt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c"># Change parameters according to gradients and learning rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">-=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">dLdU</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">-=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">dLdV</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">-=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">dLdW</span>
+    <span class="c"># Outer SGD Loop</span>
+    <span class="c"># - model: The RNN model instance</span>
+    <span class="c"># - X_train: The training data set</span>
+    <span class="c"># - y_train: The training data labels</span>
+    <span class="c"># - learning_rate: Initial learning rate for SGD</span>
+    <span class="c"># - nepoch: Number of times to iterate through the complete dataset</span>
+    <span class="c"># - evaluate_loss_after: Evaluate the loss after this many epochs</span>
+    <span class="k">def</span> <span class="nf">train_with_sgd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">nepoch</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">evaluate_loss_after</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="c"># We keep track of the losses so we can plot them later</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">num_examples_seen</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nepoch</span><span class="p">):</span>
+            <span class="c"># Optionally evaluate the loss</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">evaluate_loss_after</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+                <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">num_examples_seen</span><span class="p">,</span> <span class="n">loss</span><span class="p">))</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">'</span><span class="si">%</span><span class="s">Y-</span><span class="si">%</span><span class="s">m-</span><span class="si">%</span><span class="s">d-</span><span class="si">%</span><span class="s">H-</span><span class="si">%</span><span class="s">M-</span><span class="si">%</span><span class="s">S'</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">"</span><span class="si">%</span><span class="s">s: Loss after num_examples_seen=</span><span class="si">%</span><span class="s">d epoch=</span><span class="si">%</span><span class="s">d: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">num_examples_seen</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+                <span class="c"># Adjust the learning rate if loss increases</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="mf">0.5</span> 
+                    <span class="k">print</span> <span class="s">"Setting learning rate to </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">learning_rate</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="c"># ADDED! Saving model oarameters</span>
+                <span class="n">save_model_parameters_numpy</span><span class="p">(</span><span class="s">"./data/rnn-numpy-</span><span class="si">%</span><span class="s">d-</span><span class="si">%</span><span class="s">d-</span><span class="si">%</span><span class="s">s.npz"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_dim</span><span class="p">,</span> <span class="n">time</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="c"># For each training example...</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_train</span><span class="p">)):</span>
+                <span class="c"># One SGD step</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sgd_step</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">learning_rate</span><span class="p">)</span>
+                <span class="n">num_examples_seen</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre>
+</div>
+
+<p>更多代码参考<a href="https://github.com/clayandgithub/rnn-tutorial-rnnlm">github</a></p>
+
+<h3 id="rnn-using-theano-">RNN Using Theano <span id="Theano"></span></h3>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">theano</span> <span class="kn">as</span> <span class="nn">theano</span>
+<span class="kn">import</span> <span class="nn">theano.tensor</span> <span class="kn">as</span> <span class="nn">T</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">class</span> <span class="nc">RNNTheano</span><span class="p">:</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">bptt_truncate</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="c"># Assign instance variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">word_dim</span> <span class="o">=</span> <span class="n">word_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bptt_truncate</span> <span class="o">=</span> <span class="n">bptt_truncate</span>
+        <span class="c"># Randomly initialize the network parameters</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">word_dim</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">word_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">word_dim</span><span class="p">))</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">word_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">))</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">))</span>
+        <span class="c"># Theano: Created shared variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">'U'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">U</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">theano</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">floatX</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">'V'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">V</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">theano</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">floatX</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">'W'</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">W</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">theano</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">floatX</span><span class="p">))</span>      
+        <span class="c"># We store the Theano graph here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theano</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__theano_build__</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__theano_build__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">ivector</span><span class="p">(</span><span class="s">'x'</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">ivector</span><span class="p">(</span><span class="s">'y'</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">forward_prop_step</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="n">s_t_prev</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+            <span class="n">s_t</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">U</span><span class="p">[:,</span><span class="n">x_t</span><span class="p">]</span> <span class="o">+</span> <span class="n">W</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s_t_prev</span><span class="p">))</span>
+            <span class="n">o_t</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">nnet</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s_t</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">o_t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s_t</span><span class="p">]</span>
+        <span class="p">[</span><span class="n">o</span><span class="p">,</span><span class="n">s</span><span class="p">],</span> <span class="n">updates</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span>
+            <span class="n">forward_prop_step</span><span class="p">,</span>
+            <span class="n">sequences</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">outputs_info</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="n">T</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">))],</span>
+            <span class="n">non_sequences</span><span class="o">=</span><span class="p">[</span><span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="p">],</span>
+            <span class="n">truncate_gradient</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bptt_truncate</span><span class="p">,</span>
+            <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">o_error</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">nnet</span><span class="o">.</span><span class="n">categorical_crossentropy</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        
+        <span class="c"># Gradients</span>
+        <span class="n">dU</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">o_error</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+        <span class="n">dV</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">o_error</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+        <span class="n">dW</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">o_error</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        
+        <span class="c"># Assign functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">o</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predict</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">prediction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ce_error</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="n">o_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bptt</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="n">dU</span><span class="p">,</span> <span class="n">dV</span><span class="p">,</span> <span class="n">dW</span><span class="p">])</span>
+        
+        <span class="c"># SGD</span>
+        <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s">'learning_rate'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sgd_step</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">function</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">learning_rate</span><span class="p">],</span> <span class="p">[],</span> 
+                      <span class="n">updates</span><span class="o">=</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">-</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">dU</span><span class="p">),</span>
+                              <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">-</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">dV</span><span class="p">),</span>
+                              <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">-</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">dW</span><span class="p">)])</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_total_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ce_error</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)])</span>
+    
+    <span class="k">def</span> <span class="nf">calculate_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+        <span class="c"># Divide calculate_loss by the number of words</span>
+        <span class="n">num_words</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">Y</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_total_loss</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">num_words</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">train_with_sgd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">nepoch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">evaluate_loss_after</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="c"># We keep track of the losses so we can plot them later</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">num_examples_seen</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nepoch</span><span class="p">):</span>
+            <span class="c"># Optionally evaluate the loss</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">evaluate_loss_after</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+                <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">num_examples_seen</span><span class="p">,</span> <span class="n">loss</span><span class="p">))</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">'</span><span class="si">%</span><span class="s">Y-</span><span class="si">%</span><span class="s">m-</span><span class="si">%</span><span class="s">d-</span><span class="si">%</span><span class="s">H-</span><span class="si">%</span><span class="s">M-</span><span class="si">%</span><span class="s">S'</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">"</span><span class="si">%</span><span class="s">s: Loss after num_examples_seen=</span><span class="si">%</span><span class="s">d epoch=</span><span class="si">%</span><span class="s">d: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">num_examples_seen</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+                <span class="c"># Adjust the learning rate if loss increases</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="mf">0.5</span>  
+                    <span class="k">print</span> <span class="s">"Setting learning rate to </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">learning_rate</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="c"># ADDED! Saving model oarameters</span>
+                <span class="n">save_model_parameters_theano</span><span class="p">(</span><span class="s">"./data/rnn-theano-</span><span class="si">%</span><span class="s">d-</span><span class="si">%</span><span class="s">d-</span><span class="si">%</span><span class="s">s.npz"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_dim</span><span class="p">,</span> <span class="n">time</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="c"># For each training example...</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_train</span><span class="p">)):</span>
+                <span class="c"># One SGD step</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sgd_step</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">learning_rate</span><span class="p">)</span>
+                <span class="n">num_examples_seen</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+<span class="k">def</span> <span class="nf">gradient_check_theano</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">error_threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+    <span class="c"># Overwrite the bptt attribute. We need to backpropagate all the way to get the correct gradient</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">bptt_truncate</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="c"># Calculate the gradients using backprop</span>
+    <span class="n">bptt_gradients</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">bptt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="c"># List of all parameters we want to chec.</span>
+    <span class="n">model_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">'U'</span><span class="p">,</span> <span class="s">'V'</span><span class="p">,</span> <span class="s">'W'</span><span class="p">]</span>
+    <span class="c"># Gradient check for each parameter</span>
+    <span class="k">for</span> <span class="n">pidx</span><span class="p">,</span> <span class="n">pname</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model_parameters</span><span class="p">):</span>
+        <span class="c"># Get the actual parameter value from the mode, e.g. model.W</span>
+        <span class="n">parameter_T</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">pname</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">parameter_T</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span>
+        <span class="k">print</span> <span class="s">"Performing gradient check for parameter </span><span class="si">%</span><span class="s">s with size </span><span class="si">%</span><span class="s">d."</span> <span class="o">%</span> <span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="c"># Iterate over each element of the parameter matrix, e.g. (0,0), (0,1), ...</span>
+        <span class="n">it</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="p">[</span><span class="s">'multi_index'</span><span class="p">],</span> <span class="n">op_flags</span><span class="o">=</span><span class="p">[</span><span class="s">'readwrite'</span><span class="p">])</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">it</span><span class="o">.</span><span class="n">finished</span><span class="p">:</span>
+            <span class="n">ix</span> <span class="o">=</span> <span class="n">it</span><span class="o">.</span><span class="n">multi_index</span>
+            <span class="c"># Save the original value so we can reset it later</span>
+            <span class="n">original_value</span> <span class="o">=</span> <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+            <span class="c"># Estimate the gradient using (f(x+h) - f(x-h))/(2*h)</span>
+            <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_value</span> <span class="o">+</span> <span class="n">h</span>
+            <span class="n">parameter_T</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+            <span class="n">gradplus</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">calculate_total_loss</span><span class="p">([</span><span class="n">x</span><span class="p">],[</span><span class="n">y</span><span class="p">])</span>
+            <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_value</span> <span class="o">-</span> <span class="n">h</span>
+            <span class="n">parameter_T</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+            <span class="n">gradminus</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">calculate_total_loss</span><span class="p">([</span><span class="n">x</span><span class="p">],[</span><span class="n">y</span><span class="p">])</span>
+            <span class="n">estimated_gradient</span> <span class="o">=</span> <span class="p">(</span><span class="n">gradplus</span> <span class="o">-</span> <span class="n">gradminus</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">parameter</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_value</span>
+            <span class="n">parameter_T</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+            <span class="c"># The gradient for this parameter calculated using backpropagation</span>
+            <span class="n">backprop_gradient</span> <span class="o">=</span> <span class="n">bptt_gradients</span><span class="p">[</span><span class="n">pidx</span><span class="p">][</span><span class="n">ix</span><span class="p">]</span>
+            <span class="c"># calculate The relative error: (|x - y|/(|x| + |y|))</span>
+            <span class="n">relative_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">backprop_gradient</span> <span class="o">-</span> <span class="n">estimated_gradient</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">backprop_gradient</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">estimated_gradient</span><span class="p">))</span>
+            <span class="c"># If the error is to large fail the gradient check</span>
+            <span class="k">if</span> <span class="n">relative_error</span> <span class="o">&gt;</span> <span class="n">error_threshold</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">"Gradient Check ERROR: parameter=</span><span class="si">%</span><span class="s">s ix=</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">ix</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">"+h Loss: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">gradplus</span>
+                <span class="k">print</span> <span class="s">"-h Loss: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">gradminus</span>
+                <span class="k">print</span> <span class="s">"Estimated_gradient: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">estimated_gradient</span>
+                <span class="k">print</span> <span class="s">"Backpropagation gradient: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">backprop_gradient</span>
+                <span class="k">print</span> <span class="s">"Relative Error: </span><span class="si">%</span><span class="s">f"</span> <span class="o">%</span> <span class="n">relative_error</span>
+                <span class="k">return</span> 
+            <span class="n">it</span><span class="o">.</span><span class="n">iternext</span><span class="p">()</span>
+        <span class="k">print</span> <span class="s">"Gradient check for parameter </span><span class="si">%</span><span class="s">s passed."</span> <span class="o">%</span> <span class="p">(</span><span class="n">pname</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>更多代码参考<a href="https://github.com/clayandgithub/rnn-tutorial-rnnlm">github</a>
+另：GRU版本的Theano代码参考<a href="https://github.com/clayandgithub/rnn-tutorial-gru-lstm">github</a></p>
+
+<h3 id="rnn-using-keras-">RNN Using Keras <span id="Keras"></span></h3>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span> <span class="n">Dropout</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">LSTM</span>
+<span class="kn">from</span> <span class="nn">keras.optimizers</span> <span class="kn">import</span> <span class="n">RMSprop</span>
+<span class="kn">from</span> <span class="nn">keras.utils.data_utils</span> <span class="kn">import</span> <span class="n">get_file</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">class</span> <span class="nc">RNNKeras</span><span class="p">:</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sentenceLen</span><span class="p">,</span> <span class="n">vector_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="c"># Assign instance variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sentenceLen</span> <span class="o">=</span> <span class="n">sentenceLen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_size</span> <span class="o">=</span> <span class="n">vector_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="n">output_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model_build__</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__model_build__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sentenceLen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_size</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vector_size</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s">'softmax'</span><span class="p">))</span>
+
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">RMSprop</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s">'categorical_crossentropy'</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batchSize</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">nepoch</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batchSize</span><span class="p">,</span> <span class="n">nb_epoch</span><span class="o">=</span><span class="n">nepoch</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre>
+</div>
+
+<p>更多代码参考<a href="https://github.com/clayandgithub/learning-keras">github</a></p>
+
+<h2 id="后记">后记<span id="后记"></span></h2>
+
+<p>近几年深度学习的研究和应用越来越热，随着CNN、RNN的出现，研究DBN和SAE的人也越来越少了。不过要想用好神经网络，了解DBN和SAE还是有必要的，我也得抽空再学学CNN。</p>
+
+<p>此外，不要一开始就直接用Keras这些封装好的库，而是要先去了解RNN底层的原理和计算公式，这样对RNN才能掌握地更加透彻。而且这些封装库并不是万能的，当模型比较复杂时，有些功能通过这些高度封装的库是没有办法实现的，还是要通过theano或tensorflow自己实现。</p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/09/21/%E7%AC%94%E8%AE%B0-%E5%9F%BA%E4%BA%8Etheano%E5%AE%9E%E7%8E%B0gpu%E7%89%88%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%97%E6%B3%95/" data-toggle="tooltip" data-placement="top" title="[笔记]基于theano实现gpu版的神经网络算法">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95/" data-toggle="tooltip" data-placement="top" title="[代码]基于RNN的中文分词算法">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                        data-thread-key="/2016/10/15/[代码]三种循环神经网络(RNN)算法的实现"
+                        data-title="[代码]三种循环神经网络(RNN)算法的实现"
+                        data-url="http://localhost:4000/2016/10/15/%E4%BB%A3%E7%A0%81-%E4%B8%89%E7%A7%8D%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(RNN)%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0/" >
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="#">WWW Blog</a></li>
+                    
+                        <li><a href="#">Foo</a></li>
+                    
+                        <li><a href="#">Bar</a></li>
+                    
+                        <li><a href="#">Example Friends</a></li>
+                    
+                        <li><a href="#">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'clayoverwind';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user };
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+                    <li>
+                        <a href="https://twitter.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/clayandgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; WWW 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'auto';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

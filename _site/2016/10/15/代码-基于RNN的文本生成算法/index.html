@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="关于人工智能，自然语言处理，Java WEB开发，后台架构 | 这里是 @WWW王维维 的个人博客。">
+    <meta name="keyword"  content="王维维, clayoverwind, 王维维的博客, clayoverwind Blog, 博客, 个人网站, 互联网, 后端, 架构, Java，Linux, 深度学习">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>[代码]基于RNN的文本生成算法 - 王维维的个人网站 | WWW Personal Website</title>
+
+    <link rel="canonical" href="http://localhost:4000/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">WWW</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/test/">Test</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-2015.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-2015.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#generate new text" title="generate new text">generate new text</a>
+                        
+                        <a class="tag" href="/tags/#keras" title="keras">keras</a>
+                        
+                        <a class="tag" href="/tags/#RNN" title="RNN">RNN</a>
+                        
+                    </div>
+                    <h1>[代码]基于RNN的文本生成算法</h1>
+                    
+                    
+                    <h2 class="subheading">RNN</h2>
+                    
+                    <span class="meta">Posted by 王维维 on October 15, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>“能让机器自动生成blog就好了！”</p>
+</blockquote>
+
+<h2 id="前言">前言<span id="前言"></span></h2>
+
+<p><a href="#正文">跳过废话，直接看正文</a></p>
+
+<p>RNN相对于传统的神经网络来说对于把握上下文之间的关系更为擅长，因此现在被大量用在自然语言处理的相关任务中，例如生成与训练文集相似的文字、序列标注、中文分词等。</p>
+
+<p>此文列出两种基于RNN的文本生成算法，以供参考。</p>
+
+<hr />
+
+<h2 id="正文">正文<span id="正文"></span></h2>
+
+<h3 id="基于字符的文本生成算法">基于字符的文本生成算法<span id="基于字符的文本生成算法"></span></h3>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="s">'''Example script to generate text from Nietzsche's writings.
+At least 20 epochs are required before the generated text
+starts sounding coherent.
+It is recommended to run this script on GPU, as recurrent
+networks are quite computationally intensive.
+If you try this script on new data, make sure your corpus
+has at least ~100k characters. ~1M is better.
+'''</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span> <span class="n">Dropout</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">LSTM</span>
+<span class="kn">from</span> <span class="nn">keras.optimizers</span> <span class="kn">import</span> <span class="n">RMSprop</span>
+<span class="kn">from</span> <span class="nn">keras.utils.data_utils</span> <span class="kn">import</span> <span class="n">get_file</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">output_file_handler</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">'out.log'</span><span class="p">,</span> <span class="s">'w'</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">output_file_handler</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">get_file</span><span class="p">(</span><span class="s">'nietzsche.txt'</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s">"https://s3.amazonaws.com/text-datasets/nietzsche.txt"</span><span class="p">)</span>
+<span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'corpus length:'</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+<span class="n">chars</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">text</span><span class="p">)))</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'total chars:'</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">))</span>
+<span class="n">char_indices</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chars</span><span class="p">))</span>
+<span class="n">indices_char</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chars</span><span class="p">))</span>
+
+<span class="c"># cut the text in semi-redundant sequences of maxlen characters</span>
+<span class="n">maxlen</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">step</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">sentences</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">next_chars</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">-</span> <span class="n">maxlen</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+    <span class="n">sentences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">maxlen</span><span class="p">])</span>
+    <span class="n">next_chars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">maxlen</span><span class="p">])</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'nb sequences:'</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">))</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'Vectorization...'</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">),</span> <span class="n">maxlen</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="nb">bool</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sentences</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sentence</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">char_indices</span><span class="p">[</span><span class="n">char</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">char_indices</span><span class="p">[</span><span class="n">next_chars</span><span class="p">[</span><span class="n">i</span><span class="p">]]]</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<span class="c"># build the model: a single LSTM</span>
+<span class="k">print</span><span class="p">(</span><span class="s">'Build model...'</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">maxlen</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">))))</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">)))</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s">'softmax'</span><span class="p">))</span>
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">RMSprop</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s">'categorical_crossentropy'</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="c"># helper function to sample an index from a probability array</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">'float64'</span><span class="p">)</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperature</span>
+    <span class="n">exp_preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">exp_preds</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">exp_preds</span><span class="p">)</span>
+    <span class="n">probas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probas</span><span class="p">)</span>
+
+<span class="c"># train the model, output generated text after each iteration</span>
+<span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">):</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">'training used time : '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'-'</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Iteration'</span><span class="p">,</span> <span class="n">iteration</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">nb_epoch</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">start_index</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">-</span> <span class="n">maxlen</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">diversity</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">]:</span>
+        <span class="k">print</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">'----- diversity:'</span><span class="p">,</span> <span class="n">diversity</span><span class="p">)</span>
+
+        <span class="n">generated</span> <span class="o">=</span> <span class="s">''</span>
+        <span class="n">sentence</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">maxlen</span><span class="p">]</span>
+        <span class="n">generated</span> <span class="o">+=</span> <span class="n">sentence</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">'----- Generating with seed: "'</span> <span class="o">+</span> <span class="n">sentence</span> <span class="o">+</span> <span class="s">'"'</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">generated</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">400</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxlen</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sentence</span><span class="p">):</span>
+                <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">char_indices</span><span class="p">[</span><span class="n">char</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">1.</span>
+
+            <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">next_index</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">diversity</span><span class="p">)</span>
+            <span class="n">next_char</span> <span class="o">=</span> <span class="n">indices_char</span><span class="p">[</span><span class="n">next_index</span><span class="p">]</span>
+
+            <span class="n">generated</span> <span class="o">+=</span> <span class="n">next_char</span>
+            <span class="n">sentence</span> <span class="o">=</span> <span class="n">sentence</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">next_char</span>
+
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">next_char</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">()</span>
+</code></pre>
+</div>
+
+<p>此代码为keras的<a href="https://github.com/ogrisel/keras/blob/master/examples/lstm_text_generation.py">官方例子</a></p>
+
+<h3 id="基于字符的文本生成算法-1">基于字符的文本生成算法<span id="基于字符的文本生成算法"></span></h3>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="s">'''Example script to generate text using keras and word2vec
+
+At least 20 epochs are required before the generated text
+starts sounding coherent.
+
+It is recommended to run this script on GPU, as recurrent
+networks are quite computationally intensive.
+
+'''</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span> <span class="n">Dropout</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">LSTM</span>
+<span class="kn">from</span> <span class="nn">keras.optimizers</span> <span class="kn">import</span> <span class="n">RMSprop</span>
+<span class="kn">from</span> <span class="nn">keras.utils.data_utils</span> <span class="kn">import</span> <span class="n">get_file</span>
+<span class="kn">from</span> <span class="nn">nltk</span> <span class="kn">import</span> <span class="n">tokenize</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+
+<span class="kn">import</span> <span class="nn">gensim</span><span class="o">,</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">'</span><span class="si">%(asctime)</span><span class="s">s : </span><span class="si">%(levelname)</span><span class="s">s : </span><span class="si">%(message)</span><span class="s">s'</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+<span class="c"># a memory-friendly iterator</span>
+<span class="k">class</span> <span class="nc">MySentences</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">min_word_count_in_sentence</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirname</span> <span class="o">=</span> <span class="n">dirname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_word_count_in_sentence</span> <span class="o">=</span> <span class="n">min_word_count_in_sentence</span><span class="p">;</span>
+    
+    <span class="k">def</span> <span class="nf">process_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="n">words</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">words</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)):</span>
+                <span class="n">processed_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">processed_line</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_word_count_in_sentence</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">processed_line</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+<span class="k">def</span> <span class="nf">generate_word2vec_train_files</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">sentence_start_token</span><span class="p">,</span> <span class="n">sentence_end_token</span><span class="p">,</span> <span class="n">unkown_token</span><span class="p">,</span> <span class="n">word_min_count</span><span class="p">,</span> <span class="n">word2vec_size</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'generate_word2vec_train_files...'</span><span class="p">)</span>
+    <span class="n">tmp_word2vec_model</span> <span class="o">=</span> <span class="n">gensim</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Word2Vec</span><span class="p">(</span><span class="n">min_count</span> <span class="o">=</span> <span class="n">word_min_count</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="n">word2vec_size</span><span class="p">)</span>
+    <span class="n">original_sentences</span> <span class="o">=</span> <span class="n">MySentences</span><span class="p">(</span><span class="n">input_dir</span><span class="p">)</span>
+    <span class="n">tmp_word2vec_model</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">original_sentences</span><span class="p">)</span>
+    <span class="n">original_word2vec_vocab</span> <span class="o">=</span> <span class="n">tmp_word2vec_model</span><span class="o">.</span><span class="n">vocab</span>
+
+    <span class="n">make_dir_if_not_exist</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">input_dir</span><span class="p">):</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">),</span> <span class="s">'w'</span><span class="p">)</span>
+        <span class="n">line_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">' -=:</span><span class="se">\"\'</span><span class="s">_*</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">sentences</span> <span class="o">=</span> <span class="n">tokenize</span><span class="o">.</span><span class="n">sent_tokenize</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sentences</span><span class="p">):</span>
+                <span class="n">words</span> <span class="o">=</span> <span class="n">sentence</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">word_idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">words</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">original_word2vec_vocab</span><span class="p">:</span>
+                        <span class="n">words</span><span class="p">[</span><span class="n">word_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">unkown_token</span><span class="c">#TODO</span>
+                <span class="n">sentence</span> <span class="o">=</span> <span class="s">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">)</span>
+                <span class="n">sentences</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">sentence_start_token</span> <span class="o">+</span> <span class="s">' '</span> <span class="o">+</span> <span class="n">sentence</span> <span class="o">+</span> <span class="s">' '</span> <span class="o">+</span> <span class="n">sentence_end_token</span> <span class="o">+</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+            <span class="n">line_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">)</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">sentences</span><span class="p">)</span>
+        <span class="n">output_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"line_count"</span><span class="p">,</span> <span class="n">line_count</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">train_word2vec_model</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">,</span> <span class="n">save_model_file</span><span class="p">,</span> <span class="n">word_min_count</span><span class="p">,</span> <span class="n">word2vec_size</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'train_word2vec_model...'</span><span class="p">)</span>
+    <span class="n">word2vec_model</span> <span class="o">=</span> <span class="n">gensim</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Word2Vec</span><span class="p">(</span><span class="n">min_count</span> <span class="o">=</span> <span class="n">word_min_count</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="n">word2vec_size</span><span class="p">)</span>
+    <span class="n">train_sentences</span> <span class="o">=</span> <span class="n">MySentences</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">)</span>
+    <span class="n">word2vec_model</span><span class="o">.</span><span class="n">build_vocab</span><span class="p">(</span><span class="n">train_sentences</span><span class="p">)</span>
+    <span class="n">sentences</span> <span class="o">=</span> <span class="n">MySentences</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">)</span>
+    <span class="n">word2vec_model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">sentences</span><span class="p">)</span>
+    <span class="n">word2vec_model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">save_model_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">word2vec_model</span>
+
+<span class="k">def</span> <span class="nf">load_existing_word2vec_model</span><span class="p">(</span><span class="n">model_file_path</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span><span class="bp">None</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model_file_path</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"load existing model..."</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">gensim</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Word2Vec</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_file_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+<span class="k">def</span> <span class="nf">generate_rnn_train_files</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">fixed_sentence_len</span><span class="p">,</span> <span class="n">unkown_token</span><span class="p">,</span> <span class="n">sentence_start_token</span><span class="p">,</span> <span class="n">sentence_end_token</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'generate_rnn_train_files...'</span><span class="p">)</span>
+    <span class="n">make_dir_if_not_exist</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+
+    <span class="n">long_than_fixed_len_count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">total_sentence_count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">input_dir</span><span class="p">):</span>
+        <span class="n">output_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">),</span> <span class="s">'w'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)):</span>
+            <span class="n">sentence</span> <span class="o">=</span> <span class="n">sentence</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+            <span class="n">total_sentence_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">words</span> <span class="o">=</span> <span class="n">sentence</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">len_of_sentence</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">len_of_sentence</span> <span class="o">&gt;</span> <span class="n">fixed_sentence_len</span><span class="p">:</span>
+                <span class="n">long_than_fixed_len_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">len_of_sentence</span> <span class="o">&lt;</span> <span class="n">fixed_sentence_len</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fixed_sentence_len</span> <span class="o">-</span> <span class="n">len_of_sentence</span><span class="p">):</span>
+                    <span class="n">sentence</span> <span class="o">=</span> <span class="n">sentence</span> <span class="o">+</span> <span class="s">' '</span> <span class="o">+</span> <span class="n">sentence_end_token</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sentence</span> <span class="o">+</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+        <span class="n">output_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s">"sentence longer than fixed_len : </span><span class="si">%</span><span class="s">d / </span><span class="si">%</span><span class="s">d"</span> <span class="o">%</span><span class="p">(</span><span class="n">long_than_fixed_len_count</span><span class="p">,</span> <span class="n">total_sentence_count</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">train_rnn_model</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">,</span> <span class="n">fixed_sentence_len</span><span class="p">,</span> <span class="n">word2vec_size</span><span class="p">,</span> <span class="n">word2vec_model</span><span class="p">):</span>
+    <span class="c"># build the model: a single LSTM</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Build RNN model...'</span><span class="p">)</span>
+    <span class="n">rnn_model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+    <span class="n">rnn_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">LSTM</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">fixed_sentence_len</span><span class="p">,</span> <span class="n">word2vec_size</span><span class="p">)))</span>
+    <span class="n">rnn_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">word2vec_size</span><span class="p">))</span>
+    <span class="n">rnn_model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s">'softmax'</span><span class="p">))</span>
+
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">RMSprop</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="n">rnn_model</span><span class="o">.</span><span class="nb">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s">'categorical_crossentropy'</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">)</span>
+    
+    <span class="k">print</span><span class="p">(</span><span class="s">'Generating RNN train data...'</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="p">[]</span> <span class="c">#np.zeros((0, fixed_sentence_len, word2vec_size), dtype=np.float32)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span> <span class="c">#np.zeros((0, word2vec_size), dtype=np.float32)</span>
+    <span class="n">sentences</span> <span class="o">=</span> <span class="n">MySentences</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">:</span>
+        <span class="n">tmp_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">word2vec_model</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">sentence</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">tmp_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">word2vec_model</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">sentence</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
+        <span class="n">tmp_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">fixed_sentence_len</span><span class="p">,</span> <span class="n">word2vec_size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sentence</span><span class="p">):</span>
+            <span class="n">tmp_x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">word2vec_model</span><span class="p">[</span><span class="n">word</span><span class="p">]</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">append</span><span class="p">()</span>
+    <span class="c"># X, y = generate_rnn_train_data()</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Generate RNN train data end!'</span><span class="p">)</span>
+
+    <span class="c"># rnn_model.fit()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'Build RNN model over!'</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rnn_model</span>
+
+<span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+    <span class="n">WORD2VEC_MODE_FILE</span> <span class="o">=</span> <span class="s">"./word2vec_model.model"</span>
+    <span class="n">ORIGINAL_TRAIN_DATASET_DIR</span> <span class="o">=</span> <span class="s">"./small_train_text"</span>
+    <span class="n">WORD2VEC_TRAIN_DATASET_DIR</span> <span class="o">=</span> <span class="s">"./small_word2vec_train_text"</span>
+    <span class="n">RNN_TRAIN_DATASET_DIR</span> <span class="o">=</span> <span class="s">"./small_rnn_train_text"</span>
+    <span class="n">SENTENCE_START_TOKEN</span> <span class="o">=</span> <span class="s">"SENTENCE_START_TOKEN"</span>
+    <span class="n">SENTENCE_END_TOKEN</span> <span class="o">=</span> <span class="s">"SENTENCE_END_TOKEN"</span>
+    <span class="n">UNKNOWN_TOKEN</span> <span class="o">=</span> <span class="s">"UNKNOWN_TOKEN"</span>
+    <span class="n">FIXED_SENTENCE_LEN</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">MIN_COUNT</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">WORD2VEC_SIZE</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+
+<span class="k">def</span> <span class="nf">make_dir_if_not_exist</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dirpath</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
+    <span class="c"># word2vec train</span>
+    <span class="n">word2vec_model</span> <span class="o">=</span> <span class="n">load_existing_word2vec_model</span><span class="p">(</span><span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_MODE_FILE</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">word2vec_model</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">generate_word2vec_train_files</span><span class="p">(</span>
+            <span class="n">Config</span><span class="o">.</span><span class="n">ORIGINAL_TRAIN_DATASET_DIR</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_TRAIN_DATASET_DIR</span><span class="p">,</span>
+            <span class="n">Config</span><span class="o">.</span><span class="n">SENTENCE_START_TOKEN</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">SENTENCE_END_TOKEN</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">UNKNOWN_TOKEN</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">MIN_COUNT</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_SIZE</span><span class="p">)</span>
+
+        <span class="n">word2vec_model</span> <span class="o">=</span> <span class="n">train_word2vec_model</span><span class="p">(</span><span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_TRAIN_DATASET_DIR</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_MODE_FILE</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">MIN_COUNT</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_SIZE</span><span class="p">)</span>
+
+    <span class="c"># rnn train</span>
+    <span class="n">generate_rnn_train_files</span><span class="p">(</span>
+        <span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_TRAIN_DATASET_DIR</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">RNN_TRAIN_DATASET_DIR</span><span class="p">,</span>
+        <span class="n">Config</span><span class="o">.</span><span class="n">FIXED_SENTENCE_LEN</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">UNKNOWN_TOKEN</span><span class="p">,</span>
+        <span class="n">Config</span><span class="o">.</span><span class="n">SENTENCE_START_TOKEN</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">SENTENCE_END_TOKEN</span><span class="p">)</span>
+
+    <span class="n">rnn_model</span> <span class="o">=</span> <span class="n">train_rnn_model</span><span class="p">(</span><span class="n">Config</span><span class="o">.</span><span class="n">RNN_TRAIN_DATASET_DIR</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">FIXED_SENTENCE_LEN</span><span class="p">,</span> <span class="n">Config</span><span class="o">.</span><span class="n">WORD2VEC_SIZE</span><span class="p">,</span> <span class="n">word2vec_model</span><span class="p">)</span>
+
+<span class="n">main</span><span class="p">()</span>
+
+<span class="c"># if __name__ == "__main__":</span>
+<span class="c">#     main()</span>
+<span class="c"># </span>
+</code></pre>
+</div>
+
+<p>此代码还未完成，将来我再抽空将它完成，这里只是给一个思路。</p>
+
+<p>更多代码参考<a href="https://github.com/clayandgithub/word-based-text-generator">github</a></p>
+
+<h2 id="后记">后记<span id="后记"></span></h2>
+
+<p>目前利用基于RNN的文本生成算法能够生成通顺的句子，但是不能用来创作文章，因此RNN这种暴力模仿的文本生成算法终究不是解决之道，这个方向还有更多工作要做。</p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E5%91%BD%E5%90%8D%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB%E7%AE%97%E6%B3%95/" data-toggle="tooltip" data-placement="top" title="[代码]基于RNN的命名实体识别算法">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/10/18/%E5%85%B6%E4%BB%96-%E5%8D%9A%E5%AE%A2%E6%90%AC%E5%AE%B6/" data-toggle="tooltip" data-placement="top" title="[其他]博客搬家">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                        data-thread-key="/2016/10/15/[代码]基于RNN的文本生成算法"
+                        data-title="[代码]基于RNN的文本生成算法"
+                        data-url="http://localhost:4000/2016/10/15/%E4%BB%A3%E7%A0%81-%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/" >
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="#">WWW Blog</a></li>
+                    
+                        <li><a href="#">Foo</a></li>
+                    
+                        <li><a href="#">Bar</a></li>
+                    
+                        <li><a href="#">Example Friends</a></li>
+                    
+                        <li><a href="#">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'clayoverwind';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user };
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+                    <li>
+                        <a href="https://twitter.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/clayoverwind">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/clayandgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; WWW 2016
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'auto';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
