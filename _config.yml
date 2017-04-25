@@ -84,19 +84,7 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 # Friends
 friends: [
     {
-        title: "WWW Blog",
-        href: "#"
-    },{
-        title: "Foo",
-        href: "#"
-    },{
-        title: "Bar",
-        href: "#"
-    },{
-        title: "Example Friends",
-        href: "#"
-    },{
-        title: "It helps SEO",
-        href: "#"
+        title: "dataset",
+        href: "https://pan.baidu.com/s/1i4HaYTB#list/path=%2F"
     }
 ]
